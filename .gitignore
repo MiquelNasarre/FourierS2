@@ -21,6 +21,7 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+.intermediate/
 x64/
 x86/
 [Ww][Ii][Nn]32/
@@ -30,6 +31,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Oo]ut/
+[Ll]ib/
 [Ll]og/
 [Ll]ogs/
 

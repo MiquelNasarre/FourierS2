@@ -15,6 +15,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Fourier", "Fourier\Fourier.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Image", "Image\Image.vcxproj", "{E60BC50D-F12D-4007-A37E-5B3D059B7C32}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Graphics Core", "Graphics Core", "{8F49D987-449E-45B0-A2F5-C37F9466028C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -74,6 +76,13 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0C1C4094-3EB1-4AEA-B4DF-8C2CC2990334} = {8F49D987-449E-45B0-A2F5-C37F9466028C}
+		{F1C146DD-125D-4D9A-840C-1BD478497821} = {8F49D987-449E-45B0-A2F5-C37F9466028C}
+		{E69CE630-EAA6-4F19-9F2E-212CFAB9B9EE} = {8F49D987-449E-45B0-A2F5-C37F9466028C}
+		{E819D583-6D5E-4091-B719-CB557324CC13} = {8F49D987-449E-45B0-A2F5-C37F9466028C}
+		{E60BC50D-F12D-4007-A37E-5B3D059B7C32} = {8F49D987-449E-45B0-A2F5-C37F9466028C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2D657821-0E8B-4016-B3AB-8ABBF0F4106B}
