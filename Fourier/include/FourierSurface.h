@@ -37,7 +37,7 @@ public:
 
 		static void				fillTriangleData(unsigned short depth, Vector3f V0, Vector3f V1, Vector3f V2, Vector3f* Centers, float* Distances);
 		static void				calculateCoefficientAsync(Coefficient* coef, const unsigned int l, const Vector3f* centerTriangles, const float* areaTriangles, const float* distanceTriangles, const unsigned int numT, bool* finished);
-		static Coefficient*		calculateCoefficients(const void** extractedFigure, const unsigned int maxL, const unsigned short triangleDepth);
+		static Coefficient*		calculateCoefficients(const Polihedron* Figure, const unsigned int maxL, const unsigned short triangleDepth);
 
 		static float			Ylm(int l, int m, float phi, float theta);
 		static float			Ylm(Vector3f v, unsigned int l, int m);
@@ -60,6 +60,10 @@ public:
 		static float** Constants;
 		static float Klm(unsigned int l, int m);
 		static void generateConstants();
+
+		static float D0norm(Polihedron* figure, FourierSurface* surface = NULL);
+		static float D1norm(Polihedron* figure, FourierSurface* surface = NULL);
+		static float D2norm(Polihedron* figure, FourierSurface* surface = NULL);
 	};
 private:
 
@@ -131,6 +135,7 @@ public:
 	void updateRotation(Graphics& gfx, Quaternion rotation, bool multiplicative = false);
 	void updateScreenPosition(Graphics& gfx, Vector2f screenDisplacement);
 	void updateCurves(Graphics& gfx, float phi, float theta);
+	void updateCoefficients(Coefficient* coef, unsigned int Ncoef);
 
 	float computeError(Polihedron* Poli, bool* cancel = NULL);
 
@@ -138,6 +143,7 @@ public:
 	Vertex* getVertexPtr();
 	Coefficient* getCoefficients();
 	unsigned int getNcoefficients();
+	float getValueAt(Vector3f P);
 
 	void DrawCurves(Graphics& gfx);
 

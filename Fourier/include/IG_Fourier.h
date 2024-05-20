@@ -14,6 +14,10 @@ private:
 	static char** plotsNames;
 	static int* figureSizes;
 	static int light;
+	static bool apriori;
+	static bool figureLoaded;
+	static float error;
+	static float norm;
 
 	static void saveLightState(int id);
 	static void loadLightState(int id);

@@ -24,6 +24,7 @@
     <ClInclude Include="include\IG_Fourier.h" />
     <ClInclude Include="include\Interpolated.h" />
     <ClInclude Include="include\Polihedron.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\Fourier.cpp" />
@@ -153,6 +154,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Quaternion.hlsli" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

@@ -61,11 +61,16 @@ bool			IG::COMPUTE_ERROR = false;
 bool			IG::ERROR_WINDOW = false;
 float*			IG::COMPUTED_ERRORS = NULL;
 
+bool			IG::COMPUTE_NORMS = false;
+float			IG::NORMS[3] = { -1.f, -1.f, -1.f };
+int				IG::PRECOMPUTE = -1;
+bool			IG::UPDATE_PRECOMPUTE = false;
+
 bool			IG::UPDATE_TEXTURE = false;
 _float4color	IG::TEXTURE = { -1.f,0.f,0.f,0.f };
 
-int						IG::UPDATE_LIGHT = -1;
-IG::lightsource*		IG::LIGHTS = (IG::lightsource*)calloc(sizeof(IG::lightsource), 8);
+int					IG::UPDATE_LIGHT = -1;
+IG::lightsource*	IG::LIGHTS = (IG::lightsource*)calloc(sizeof(IG::lightsource), 8);
 
 #pragma endregion
 
@@ -86,7 +91,7 @@ void Fourier::deleteCoefWindow()
 //	Main Window
 
 Fourier::Fourier()
-	: window(960, 720, "Fourier", "", true)
+	: window(960, 720, "Fourier")
 {
 	window.setFramerateLimit(60);
 
@@ -305,6 +310,79 @@ void Fourier::eventManager()
 		dangle = 0.f;
 	}
 
+	// Error estimates
+
+	if (IG::UPDATE_PRECOMPUTE)
+	{
+		IG::UPDATE_PRECOMPUTE = false;
+		if (errorSurface)
+			errorSurface->~FourierSurface();
+		free(errorSurface);
+		errorSurface = NULL;
+
+		if (IG::PRECOMPUTE != -1)
+		{
+			errorSurface = new(FourierSurface);
+
+			std::thread(calculateCoefficientsAsync, &coef, (const Polihedron**)&DataPlots[IG::COPY], IG::PRECOMPUTE, &Fecoef, nullptr).detach();
+		}
+	}
+	if (Fecoef)
+	{
+		Fecoef = false;
+		errorSurface->updateCoefficients(coef, (IG::PRECOMPUTE + 1) * (IG::PRECOMPUTE + 1));
+		IG::COMPUTE_NORMS = true;
+		IG::ALREADY_EXISTS = true;
+		free(coef);
+	}
+
+	if (IG::COMPUTE_NORMS)
+	{
+		IG::COMPUTE_NORMS = false;
+		IG::NORMS[0] = -1.f;
+		IG::NORMS[1] = -1.f;
+		IG::NORMS[2] = -1.f;
+
+		if (IG::ALREADY_EXISTS)
+		{
+			Fsplot = true;
+		}
+		else
+		{
+			extractedFigure = FourierSurface::FileManager::extractFigureFromFile(IG::FILENAME);
+			add1to(DataPlots, IG::NPLOT);
+			DataPlots[IG::NPLOT] = new(Polihedron);
+			std::thread(createPlotAsync, &window.graphics, DataPlots[IG::NPLOT], extractedFigure, &Fsplot, &mtx).detach();
+		}
+
+	}
+
+	if (Fsplot)
+	{
+		Fsplot = false;
+
+		if (IG::ALREADY_EXISTS)
+		{
+			IG::ALREADY_EXISTS = false;
+			IG::VIEW1 = -IG::COPY - 2;
+		}
+		else
+		{
+			IG::NPLOT++;
+			IG::VIEW1 = -int(IG::NPLOT) - 1;
+		}
+		if (extractedFigure)
+		{
+			free((void*)extractedFigure[2]);
+			free(extractedFigure);
+			extractedFigure = NULL;
+		}
+
+		IG::DOUBLE_VIEW = false;
+
+		std::thread(computeNormsAsync, DataPlots[IG::COPY], IG::NORMS, errorSurface).detach();
+	}
+
 	// Multithread
 
 	if (IG::CALCULATE_FIGURE)
@@ -312,35 +390,28 @@ void Fourier::eventManager()
 		IG::CALCULATE_FIGURE = false;
 		IG::LOADING = true;
 
-		FourierSurface** tFigure = (FourierSurface**)calloc(IG::NFIG + 1, sizeof(void*));
-		for (unsigned int i = 0; i < IG::NFIG; i++)
-			tFigure[i] = Figure[i];
-		if(IG::NFIG)
-			free(Figure);
-		Figure = tFigure;
+		add1to(Figure, IG::NFIG);
 		Figure[IG::NFIG] = new(FourierSurface);
 
 		if (IG::FIGURE_FILE)
 		{
-			extractedFigure = FourierSurface::FileManager::extractFigureFromFile(IG::FILENAME);
+			unsigned int Poli = 0u;
 
 			if (!IG::ALREADY_EXISTS)
 			{
-				Polihedron** tPlots = (Polihedron**)calloc(IG::NPLOT + 1, sizeof(void*));
-				for (unsigned int i = 0; i < IG::NPLOT; i++)
-					tPlots[i] = DataPlots[i];
-				if (IG::NPLOT)
-					free(DataPlots);
-				DataPlots = tPlots;
+				extractedFigure = FourierSurface::FileManager::extractFigureFromFile(IG::FILENAME);
+				Poli = IG::NPLOT;
+				add1to(DataPlots, IG::NPLOT);
 				DataPlots[IG::NPLOT] = new(Polihedron);
-				std::thread(createPlotAsync, &window.graphics, DataPlots[IG::NPLOT], extractedFigure, &Fplot, &mtx).detach();
+				std::thread(createPlotAsync, &window.graphics, DataPlots[Poli], extractedFigure, &Fplot, &mtx).detach();
 			}
 			else
 			{
+				Poli = -IG::COPY - 2;
 				Fplot = true;
 			}
 
-			std::thread(calculateCoefficientsAsync, &coef, extractedFigure, IG::MAXL, &Fcoef).detach();
+			std::thread(calculateCoefficientsAsync, &coef, (const Polihedron**)&DataPlots[Poli], IG::MAXL, &Fcoef, &Fplot).detach();
 			std::thread(createFigureAsync, &window.graphics, Figure[IG::NFIG], &coef, (IG::MAXL + 1) * (IG::MAXL + 1), &Ffigu, &mtx, &Fcoef).detach();
 		}
 		else
@@ -380,8 +451,6 @@ void Fourier::eventManager()
 		{
 			IG::VIEW2 = IG::COPY;
 			IG::ALREADY_EXISTS = false;
-			free((void*)extractedFigure[0]);
-			free((void*)extractedFigure[1]);
 		}
 		else
 		{
@@ -389,9 +458,17 @@ void Fourier::eventManager()
 			IG::VIEW2 = -int(IG::NPLOT) - 1;
 		}
 
-		free((void*)extractedFigure[2]);
-		free(extractedFigure);
+		if (extractedFigure)
+		{
+			free((void*)extractedFigure[2]);
+			free(extractedFigure);
+			extractedFigure = NULL;
+		}
 		free(coef);
+
+		add1to(IG::PAIRS, IG::PAIRS_SIZE);
+		IG::PAIRS[IG::PAIRS_SIZE] = { IG::VIEW1, IG::VIEW2 };
+		IG::PAIRS_SIZE++;
 	}
 
 	//	Interpolation
@@ -698,7 +775,7 @@ void Fourier::createPlotAsync(Graphics* gfx, Polihedron* dataplot, const void** 
 	int numT = ((int*)extractedFigure[2])[0];
 	int numV = ((int*)extractedFigure[2])[1];
 
-	dataplot->create(*gfx, vertexs, triangles, numT, nullptr, false, true, true, mtx);
+	dataplot->create(*gfx, vertexs, triangles, numT, numV, nullptr, false, true, true, mtx);
 	*done = true;
 }
 
@@ -713,9 +790,12 @@ void Fourier::createFigureAsync(Graphics* gfx, FourierSurface* figure, Coefficie
 	*done = true;
 }
 
-void Fourier::calculateCoefficientsAsync(Coefficient** coef, const void** extractedFigure, unsigned int maxL, bool* done)
+void Fourier::calculateCoefficientsAsync(Coefficient** coef, const Polihedron** Figure, unsigned int maxL, bool* done, bool* begin)
 {
-	*coef = FourierSurface::Functions::calculateCoefficients(extractedFigure, maxL, IG::TDEPTH);
+	while (begin && !(*begin))
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+	*coef = FourierSurface::Functions::calculateCoefficients(*Figure, maxL, IG::TDEPTH);
 	*done = true;
 }
 
@@ -724,4 +804,11 @@ void Fourier::computeErrorsAsync(FourierSurface* surface, Polihedron* poli, floa
 	float temp = surface->computeError(poli, cancel);
 	*result = temp;
 	*finished = true;
+}
+
+void Fourier::computeNormsAsync(Polihedron* poli, float* results, FourierSurface* surface)
+{
+	results[0] = FourierSurface::Functions::D0norm(poli, surface);
+	results[1] = FourierSurface::Functions::D1norm(poli, surface);
+	results[2] = FourierSurface::Functions::D2norm(poli, surface);
 }

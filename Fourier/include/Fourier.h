@@ -52,6 +52,11 @@ struct IG {
 	static bool ERROR_WINDOW;
 	static float* COMPUTED_ERRORS;
 
+	static bool COMPUTE_NORMS;
+	static float NORMS[3];
+	static int PRECOMPUTE;
+	static bool UPDATE_PRECOMPUTE;
+
 	static Vector2i WindowDim;
 
 	static int UPDATE_LIGHT;
@@ -102,7 +107,7 @@ private:
 
 	//	Figures
 
-	Polihedron** DataPlots;
+	Polihedron** DataPlots = NULL;
 
 	//	Harmonics
 
@@ -113,11 +118,17 @@ private:
 
 	bool Ffigu = false;
 	bool Fcoef = false;
+	bool Fecoef = false;
 	bool Fplot = false;
+	bool Fsplot = false;
 	const void** extractedFigure = NULL;
-	Coefficient* coef;
+	Coefficient* coef = NULL;
 	std::mutex mtx;
-	FourierSurface** Figure;
+	FourierSurface** Figure = NULL;
+
+	//	Surface for error
+
+	FourierSurface* errorSurface = NULL;
 
 	//	Interpolations
 	
@@ -137,8 +148,9 @@ private:
 
 	static void createPlotAsync(Graphics* gfx, Polihedron* dataplot, const void** extractedFigure, bool* done, std::mutex* mtx);
 	static void createFigureAsync(Graphics* gfx, FourierSurface* figure, Coefficient** coef, unsigned int ncoef, bool* done, std::mutex* mtx, bool* begin);
-	static void calculateCoefficientsAsync(Coefficient** coef, const void** extractedFigure, unsigned int maxL, bool* done);
+	static void calculateCoefficientsAsync(Coefficient** coef, const Polihedron** Figure, unsigned int maxL, bool* done, bool* begin = NULL);
 	static void computeErrorsAsync(FourierSurface* surface, Polihedron* poli, float* result, bool* finished, bool* cancel);
+	static void computeNormsAsync(Polihedron* poli, float* results, FourierSurface* surface);
 
 public:
 	Fourier();

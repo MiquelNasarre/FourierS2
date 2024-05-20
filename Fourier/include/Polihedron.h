@@ -8,13 +8,11 @@ public:
 
 	Polihedron() {}
 	~Polihedron();
-	Polihedron(Graphics& gfx, const Vector3f* vertexs, const Vector3i* triangles, UINT numT, const Color* colors = NULL, bool vertexColor = false, bool transparency = true, bool doubleSided = true, std::mutex* mtx = NULL);
-//	Polihedron(Graphics& gfx, const Vector3f* vertexs, const unsigned short* triangles, UINT numT, const Color* colors = NULL, bool vertexColor = false, bool transparency = true, bool doubleSided = true, std::mutex* mtx = NULL);
+	Polihedron(Graphics& gfx, const Vector3f* vertexs, const Vector3i* triangles, UINT numT, UINT numV, const Color* colors = NULL, bool vertexColor = false, bool transparency = true, bool doubleSided = true, std::mutex* mtx = NULL);
 
-	void create(Graphics& gfx, const Vector3f* vertexs, const Vector3i* triangles, UINT numT, const Color* colors = NULL, bool vertexColor = false, bool transparency = true, bool doubleSided = true, std::mutex* mtx = NULL);
-//	void create(Graphics& gfx, const Vector3f* vertexs, const unsigned short* triangles, UINT numT, const Color* colors = NULL, bool vertexColor = false, bool transparency = true, bool doubleSided = true, std::mutex* mtx = NULL);
+	void create(Graphics& gfx, const Vector3f* vertexs, const Vector3i* triangles, UINT numT, UINT numV, const Color* colors = NULL, bool vertexColor = false, bool transparency = true, bool doubleSided = true, std::mutex* mtx = NULL);
 
-
+	void generateNeighbourhood();
 	void updateShape(Graphics& gfx, const Vector3f* vertexs, const Vector3i* triangles, UINT numT, const Color* colors = NULL, bool vertexColor = false, std::mutex* mtx = NULL);
 	void updateRotation(Graphics& gfx, float rotationX, float rotationY, float rotationZ);
 	void updateRotation(Graphics& gfx, Vector3f axis, float angle, bool multiplicative = false);
@@ -25,16 +23,30 @@ public:
 	void updateLight(Graphics& gfx, UINT id, _float4vector intensity, _float4color color, _float4vector position);
 	void clearLights(Graphics& gfx);
 
-	Quaternion getRotation();
-	Vector3f getPosition();
-	const Vector3f* getVertexs();
-	const Vector3i* getTriangles();
-	unsigned int getNumTriangles();
+	Quaternion getRotation() const;
+	Vector3f getPosition() const;
+	const Vector3f* getVertexs() const;
+	const Vector3i* getTriangles() const;
+	const Vector3f* getNormals() const;
+	unsigned int getNumTriangles() const;
+	unsigned int getNumVertexs() const;
+	const unsigned int* getValencies() const;
+	const int** getNeighbours() const;
+	const float** getNeighboursAngles() const;
+	const float* getAreaTriangles() const;
+	const float* getVertexsWeight() const;
 
 private:
+	int** neighbours = NULL;
+	unsigned int* valencia = NULL;
+	float** neighboursAngles = NULL;
+	float* areaTriangles = NULL;
+	float* vertexsWeight = NULL;
+	Vector3f* Normals = NULL;
 	Vector3f* Vertexs = NULL;
 	Vector3i* Triangles = NULL;
 	unsigned int numTriangles = 0u;
+	unsigned int numVertexs = 0u;
 
 	struct Vertex {
 		Vector3f vector;

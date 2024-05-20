@@ -92,7 +92,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";SHADERS_DIR=LR"($(ProjectDir)Shaders\)";_CRT_NO_WARNINGS;IS_DEBUG=true;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";_CRT_NO_WARNINGS;IS_DEBUG=true;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)include/;$(SolutionDir)Math/include/;$(SolutionDir)dxerr/include/;$(SolutionDir)Image/include/;$(SolutionDir)imGui/include/</AdditionalIncludeDirectories>
@@ -117,7 +117,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";SHADERS_DIR=LR"($(ProjectDir)Shaders\)";_CRT_NO_WARNINGS;NDEBUG;IS_DEBUG=false;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";_CRT_NO_WARNINGS;NDEBUG;IS_DEBUG=false;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)include/;$(SolutionDir)Math/include/;$(SolutionDir)dxerr/include/;$(SolutionDir)Image/include/;$(SolutionDir)imGui/include/</AdditionalIncludeDirectories>
@@ -142,7 +142,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";SHADERS_DIR=LR"($(ProjectDir)Shaders\)";_CRT_NO_WARNINGS;IS_DEBUG=true;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";_CRT_NO_WARNINGS;IS_DEBUG=true;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)include/;$(SolutionDir)Math/include/;$(SolutionDir)dxerr/include/;$(SolutionDir)Image/include/;$(SolutionDir)imGui/include/</AdditionalIncludeDirectories>
@@ -167,7 +167,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";SHADERS_DIR=LR"($(ProjectDir)Shaders\)";_CRT_NO_WARNINGS;NDEBUG;IS_DEBUG=false;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RESOURCES_DIR=R"($(ProjectDir)Resources\)";_CRT_NO_WARNINGS;NDEBUG;IS_DEBUG=false;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)include/;$(SolutionDir)Math/include/;$(SolutionDir)dxerr/include/;$(SolutionDir)Image/include/;$(SolutionDir)imGui/include/</AdditionalIncludeDirectories>

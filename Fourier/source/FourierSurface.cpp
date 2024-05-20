@@ -185,12 +185,12 @@ void			FourierSurface::Functions::calculateCoefficientAsync(Coefficient* coef, c
 	*finished = true;
 }
 
-Coefficient*	FourierSurface::Functions::calculateCoefficients(const void** extractedFigure, const unsigned int maxL, const unsigned short triangleDepth)
+Coefficient*	FourierSurface::Functions::calculateCoefficients(const Polihedron* Figure, const unsigned int maxL, const unsigned short triangleDepth)
 {
-	const Vector3f* vertexs = (Vector3f*)extractedFigure[0];
-	const Vector3i* triangles = (Vector3i*)extractedFigure[1];
-	const int numT = ((int*)extractedFigure[2])[0];
-	const int numV = ((int*)extractedFigure[2])[1];
+	const Vector3f* vertexs = Figure->getVertexs();
+	const Vector3i* triangles = Figure->getTriangles();
+	const int numT = Figure->getNumTriangles();
+	const int numV = Figure->getNumVertexs();
 
 	// Now we have the figure
 	// Lets calculate the coefficients
@@ -202,6 +202,7 @@ Coefficient*	FourierSurface::Functions::calculateCoefficients(const void** extra
 	Vector3f* centerTriangles = (Vector3f*)calloc(triangleDivisions * numT, sizeof(Vector3f));
 	float* areaTriangles = (float*)calloc(triangleDivisions * numT, sizeof(float));
 	float* distanceTriangles = (float*)calloc(triangleDivisions * numT, sizeof(float));
+	const float* areas = Figure->getAreaTriangles();
 
 	for (int i = 0; i < numT; i++)
 	{
@@ -209,32 +210,17 @@ Coefficient*	FourierSurface::Functions::calculateCoefficients(const void** extra
 		Vector3f V2 = vertexs[triangles[i].y];
 		Vector3f V3 = vertexs[triangles[i].z];
 
-		Vector3f V12 = (V1 * V2 * V1).normalize();
-		Vector3f V13 = (V1 * V3 * V1).normalize();
-
-		float angle1 = acosf(V13 ^ V12);
-
-		Vector3f V21 = (V2 * V1 * V2).normalize();
-		Vector3f V23 = (V2 * V3 * V2).normalize();
-
-		float angle2 = acosf(V23 ^ V21);
-
-		Vector3f V32 = (V3 * V2 * V3).normalize();
-		Vector3f V31 = (V3 * V1 * V3).normalize();
-
-		float angle3 = acosf(V31 ^ V32);
-
 		if (triangleDepth)
 		{
 			fillTriangleData(triangleDepth, V1, V2, V3, &centerTriangles[i * triangleDivisions], &distanceTriangles[i * triangleDivisions]);
-			float area = (angle1 + angle2 + angle3 - pi) / triangleDivisions;
+			float area = areas[i] / triangleDivisions;
 			for (unsigned int j = 0; j < triangleDivisions; j++)
 				areaTriangles[triangleDivisions * i + j] = area;
 		}
 		else
 		{
 			centerTriangles[i] = (V1 + V2 + V3) / 3.f;
-			areaTriangles[i] = angle1 + angle2 + angle3 - pi;
+			areaTriangles[i] = areas[i];
 			distanceTriangles[i] = centerTriangles[i].abs();
 			centerTriangles[i].normalize();
 		}
@@ -675,6 +661,125 @@ void			FourierSurface::Functions::generateConstants()
 		for (unsigned int m = 1; m <= l; m++)
 			Constants[l][m] = sqrtf(float(2 * (2 * l + 1))) / Functions::sqDivFactorial(l + m, l - m);
 	}
+}
+
+float			FourierSurface::Functions::D0norm(Polihedron* figure, FourierSurface* surface)
+{
+	const Vector3f* vertexs = figure->getVertexs();
+	const Vector3i* triangles = figure->getTriangles();
+	const float* areas = figure->getAreaTriangles();
+	const unsigned int numT = figure->getNumTriangles();
+	const unsigned int numV = figure->getNumVertexs();
+
+	if (surface)
+	{
+		Vector3f* tvertexs = (Vector3f*)calloc(numV, sizeof(Vector3f));
+		for (unsigned int i = 0; i < numV; i++)
+		{
+			float abs = vertexs[i].abs();
+			tvertexs[i] = vertexs[i] / abs * (abs - surface->getValueAt(vertexs[i] / abs));
+		}
+		vertexs = tvertexs;
+	}
+
+	float norm = 0.f;
+
+	for (unsigned int i = 0; i < numT; i++)
+	{
+		Vector3f V1 = vertexs[triangles[i].x];
+		Vector3f V2 = vertexs[triangles[i].y];
+		Vector3f V3 = vertexs[triangles[i].z];
+		float center = ((V1 + V2 + V3) / 3.f).abs();
+		norm += areas[i] * center * center;
+	}
+
+	if (surface)
+		free((Vector3f*)vertexs);
+
+	return norm;
+}
+
+float			FourierSurface::Functions::D1norm(Polihedron* figure, FourierSurface* surface)
+{
+	const Vector3f* vertexs = figure->getVertexs();
+	const Vector3i* triangles = figure->getTriangles();
+	const Vector3f* normals = figure->getNormals();
+	const float* areas = figure->getAreaTriangles();
+	const unsigned int numT = figure->getNumTriangles();
+	const unsigned int numV = figure->getNumVertexs();
+
+	if (surface)
+	{
+		Vector3f* tvertexs = (Vector3f*)calloc(numV, sizeof(Vector3f));
+		for (unsigned int i = 0; i < numV; i++)
+		{
+			float abs = vertexs[i].abs();
+			tvertexs[i] = vertexs[i] / abs * (abs - surface->getValueAt(vertexs[i] / abs));
+		}
+		vertexs = tvertexs;
+	}
+
+	float norm = 0.f;
+
+	for (unsigned int i = 0; i < numT; i++)
+	{
+		Vector3f V1 = vertexs[triangles[i].x];
+		Vector3f V2 = vertexs[triangles[i].y];
+		Vector3f V3 = vertexs[triangles[i].z];
+		float center = ((V1 + V2 + V3) / 3.f).abs();
+		float prod = (normals[i] ^ ((V1 + V2 + V3) / 3.f));
+		norm += areas[i] * center * center * ((center * center) / (prod * prod) - 1.f);
+	}
+
+	if (surface)
+		free((Vector3f*)vertexs);
+
+	return norm;
+}
+
+float			FourierSurface::Functions::D2norm(Polihedron* figure, FourierSurface* surface)
+{
+	const Vector3f* vertexs = figure->getVertexs();
+	const Vector3i* triangles = figure->getTriangles();
+	const float* areas = figure->getAreaTriangles();
+	const unsigned int numT = figure->getNumTriangles();
+	const unsigned int numV = figure->getNumVertexs();
+
+	const unsigned int* valencies = figure->getValencies();
+	const int** neighbours = figure->getNeighbours();
+	const float** nangles = figure->getNeighboursAngles();
+	const float* vertexsWeight = figure->getVertexsWeight();
+
+	if (surface)
+	{
+		Vector3f* tvertexs = (Vector3f*)calloc(numV, sizeof(Vector3f));
+		for (unsigned int i = 0; i < numV; i++)
+		{
+			float abs = vertexs[i].abs();
+			tvertexs[i] = vertexs[i] / abs * (abs - surface->getValueAt(vertexs[i] / abs));
+		}
+		vertexs = tvertexs;
+	}
+
+	float norm = 0.f;
+
+	for (unsigned int i = 0; i < numV; i++)
+	{
+		float sumnum = 0.f;
+		float sumden = 0.f;
+		for (unsigned int j = 0; j < valencies[i]; j++)
+		{
+			float weight = (nangles[i][2 * ((j - 1 + valencies[i]) % valencies[i]) + 1] + nangles[i][2 * ((j + 1) % valencies[i])]);
+			sumnum += (vertexs[neighbours[i][j]].abs() - vertexs[i].abs()) * weight;
+			sumden += (vertexs[neighbours[i][j]] / vertexs[neighbours[i][j]].abs() - vertexs[i] / vertexs[i].abs()).abs() * weight;
+		}
+		norm += vertexsWeight[i] * (16 * sumnum * sumnum) / (sumden * sumden);
+	}
+
+	if (surface)
+		free((Vector3f*)vertexs);
+
+	return norm;
 }
 
 // Surface creation & stuff
@@ -1168,11 +1273,23 @@ void		FourierSurface::updateCurves(Graphics& gfx, float phi, float theta)
 	curves.updateShape(gfx, Coef, Ncoef, phi, theta);
 }
 
+void		FourierSurface::updateCoefficients(Coefficient* coef, unsigned int ncoef)
+{
+	if (Coef)
+		free(Coef);
+
+	Coef = (Coefficient*)calloc(ncoef, sizeof(Coefficient));
+	for (unsigned int i = 0; i < ncoef; i++)
+		Coef[i] = coef[i];
+	Ncoef = ncoef;
+}
+
 float		FourierSurface::computeError(Polihedron* Poli, bool* cancel)
 {
 	const Vector3f* vertexs = Poli->getVertexs();
 	const Vector3i* triangles = Poli->getTriangles();
 	const unsigned int numTriangles = Poli->getNumTriangles();
+	const float* areas = Poli->getAreaTriangles();
 
 	float absPoli = 0.f;
 	float absDif = 0.f;
@@ -1186,23 +1303,8 @@ float		FourierSurface::computeError(Polihedron* Poli, bool* cancel)
 		Vector3f V2 = vertexs[triangles[i].y];
 		Vector3f V3 = vertexs[triangles[i].z];
 
-		Vector3f V12 = (V1 * V2 * V1).normalize();
-		Vector3f V13 = (V1 * V3 * V1).normalize();
-
-		float angle1 = acosf(V13 ^ V12);
-
-		Vector3f V21 = (V2 * V1 * V2).normalize();
-		Vector3f V23 = (V2 * V3 * V2).normalize();
-
-		float angle2 = acosf(V23 ^ V21);
-
-		Vector3f V32 = (V3 * V2 * V3).normalize();
-		Vector3f V31 = (V3 * V1 * V3).normalize();
-
-		float angle3 = acosf(V31 ^ V32);
-
 		Vector3f center = (V1 + V2 + V3) / 3.f;
-		float area = angle1 + angle2 + angle3 - pi;
+		float area = areas[i];
 		float distance = center.abs();
 		center.normalize();
 
@@ -1235,6 +1337,14 @@ Coefficient* FourierSurface::getCoefficients()
 unsigned int	FourierSurface::getNcoefficients()
 {
 	return Ncoef;
+}
+
+float FourierSurface::getValueAt(Vector3f P)
+{
+	float value = 0.f;
+	for (unsigned int j = 0u; j < Ncoef; j++)
+		value += Coef[j].C * Functions::Ylm(P, Coef[j].L, Coef[j].M);
+	return value;
 }
 
 unsigned int	FourierSurface::getNvertexs()
