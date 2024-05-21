@@ -1,3 +1,3 @@
 # FourierS2
 
-[link](https://drive.google.com/drive/folders/1MVt9hdBfTvYaDJyt3OJUD-ejvkNGy-UU?usp=sharing)
+[link](https://github.com/MiquelNasarre/FourierS2/releases/tag/v1.0)
