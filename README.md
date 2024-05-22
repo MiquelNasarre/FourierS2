@@ -166,5 +166,127 @@ Lets make a brief run through all the _Fourier_ project files.
   different _FourierSurface_'s. the _Interpolated_ class contains a single interpolation between two surfaces and the
   _InterpolatedString_ class contains multiple instances of the previous one, to interpolate between any number of surfaces.
 
-## Math Involved
+## Math Involved & Additional Information
+
+In this section we intent to cover the most important pieces of math used specifically for this program. The ones realted to the 
+Fourier computations are already explained in the original paper. However here we will go through them again as well as introducing 
+some additional information.
+
+### Multithreading
+
+This program is my first attempt at multithreading, this meaning that the program runs on different instances on your computer, 
+allowing for better CPU management as well as uninterrupted experience. 
+
+I am proud to say that such implementation has greatly improved the experience of using the program and its performance. Lets give some 
+examples where different threads are used.
+
+Every time you load a data file it launches a thread that calculates all the coefficients and another one that waits for the first one 
+to finish and then calculates the surface using those coefficients. This allows the user to keep interacting with the application while 
+the computations are being done in the background. Once the coefficients and surface are fully computed it will display them to the user.
+
+Every time it needs to do a demanding computation, like the ones seen in the previous paragraph or the clearest example might be generating 
+all the dataset, it launches multiple threads in order to spread the work. Nowadays most CPU's have multiple logical units, so that allows 
+for a great boost in performance and a more efficient CPU usage.
+
+### Quaternion Rotations
+
+Though not exclusive to this project, and already covered in the LearnDirectX repository, I think it is of great mathematical interest to 
+discuss the motion of the plots. If you have played with the program you might have noticed that the mobility of the figures feels really 
+natural and not rigid in any way.
+
+That would not be possible if it was not for the quaternions. For a good understanding of how they work and relate to the rotations in a 
+three dimensional space i recommend the 3blue1brown videos [Visualizing quaternions](https://www.youtube.com/watch?v=d4EgbgTm0Bg) and 
+[Quaternions and 3d rotation](https://www.youtube.com/watch?v=zjMuIxRvygQ), and its associated website https://eater.net/quaternions.
+
+For a small explanation, if we want to rotate our figure around an axis represented by the unitari vector $v\in\mathbb{R}^3$ by a given 
+angle $\theta$. We consider the quaternions 
+
+$$
+q = \cos\frac{\theta}{2} + v\cdot(i,j,k) \sin\frac{\theta}{2}
+$$
+
+$$
+q^\prime = \cos\frac{\theta}{2} - v\cdot(i,j,k) \sin\frac{\theta}{2}
+$$
+
+where $\cdot$ is the dot product. Then we can rotate any point $p\in\mathbb{R}^3$ by again converting it into a quaternion $P=p\cdot(i,j,k)$ 
+and performing the operation 
+
+$$
+P^r = q\ P\ q^\prime
+$$
+
+Every drawable on our program then stores its own quaternion $q_0$, and if you want to add any further rotations given by the quaternion $q$
+is as simple as multiplying both of them to obtain the updated rotation $q_0=q\ q_0$, and for every point it computes $P^r = q_0\ P\ q_0^\prime$ 
+to know its new position in $\mathbb{R}^3$.
+
+
+### Representation of the Sphere
+
+Since we will be working on functions of the unit sphere it is important to have a good way to represent it with a finite amount of 
+points. One might think of using the parametrizations we already have, with $\varphi$ and $\theta$ to subdivide the sphere in squares 
+for subdivisions of the intervals $(0,2\pi)$ and $(0,\pi)$ respectively. Such way however would result on a very unevenly spaced set 
+of points, with singularities on the poles. Therefore a better way of triangulating the sphere is needed.
+
+Lets introduce then the icosphere. Starting with the platonic solid containing the maximum amount of triangle faces, the icosahedron, 
+hence the name, we consider it the icosphere of depth zero. For every value we increase in depth, every triangle of the icosphere gets 
+subdivided into four equal-sized triangles, by adding a middle triangle formed by the middle points of each segment. Once the depth is 
+the one specified, all the vertexs are normalized, and we have an icosphere. An icosphere of depth $n$ is formed by $20\cdot4^n$ 
+triangles, $30\cdot4^n$ aristas and $10\cdot4^n+2$ vertexs.
+
+![progression](https://github.com/MiquelNasarre/FourierS2/assets/124403865/7463d048-9c24-4efd-934f-5a4ca17e3287)
+
+This picture shows the progression from the icosahedron, or depth zero, to the icosphere of depth $4$. 
+
+The program however represents the sphere as the icosphere of depth $6$, with $81920$ faces, $122880$ aristas and $40962$ vertexs. 
+Once the fisrt creation of a _FourierSurface_ is called on the application, it generates all the points and triangles that it will be using as 
+$\mathbb{S}^2$ for the rest of its runtime. Also these are the vertexs where the dataset of all the Spherical Harmonic values is generated.
+
+### Computation of the Spherical Harmonics
+
+Given the parametrization of the sphere used on the paper
+
+$$
+\Phi:(0,2\pi)\times(0,\pi)\rightarrow\mathbb{S}^2\in\mathbb{R}^3
+$$
+
+$$
+(\varphi,\theta) \rightarrow (\sin\theta\cos\varphi,\sin\theta\sin\varphi,\cos\theta)
+$$
+
+Lets remember our expression for the spherical harmonics
+
+$$
+Y_\ell^m(\varphi,\theta) = \begin{cases}
+				\sqrt{\frac{2(2\ell + 1)(\ell - m)!}{2\pi(\ell + m)!}} 
+				P_\ell^m (\cos\theta) \cos(m\varphi) 
+				& \text{si }\ m>0
+				\\
+				\\
+				\sqrt{\frac{2\ell + 1}{4\pi}}P_\ell^0 (\cos\theta) 
+				& \text{si }\ m=0
+				\\
+				\\
+				\sqrt{\frac{2(2\ell + 1)(\ell - |m|)!}{2\pi(\ell + |m|)!}} 
+				P_\ell^{|m|} (\cos\theta) \sin(|m|\varphi)
+				& \text{si }\ m<0
+			\end{cases}
+$$
+
+We will divide the expression as in the paper and write $Y_\ell^m(\varphi,\theta) = K_\ell^m P_\ell^m(\cos\theta) \Upsilon_m(\varphi)$.
+
+The constants up front are calculated for all the $\ell$ and $m$ values upon starting the program. Here we can explore the limitant factor that 
+does not allow us to go further than $\ell=28$. For storing the values of any decimal number along the program we use _float_'s, this occupy $4$Bytes 
+in memory, and $8$bits of them are used for storing the power of two, the smallest prower of two it can store is $-127$. If we evaluate for example 
+$K_{29}^{29}$ we obtain
+
+$$
+K_{29}^{29} \approx 1.99871\cdot 10^{-39} \approx 1.36025\cdot2^{-129}
+$$
+
+Therefore such small value can not be stored in a _float_. This is not a complete limitation, since it would be as easy as using _double_'s which allow 
+for bigger precision, nevertheless $\ell\leq28$ allows $841$ coefficients, which I consider good enough for the purposes of this program.
+
+Now lets talk about $\Upsilon_m(\varphi)$,
+
 
