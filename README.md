@@ -10,14 +10,14 @@ The next image showcases the basis for the $L^2(\mathbb{S}^2)$ functions, the Sp
 in the application. THe areas shaded in blue correspond to the positive values of the functions, and the 
 ones shaded in yellow to the negative. All values are made positive for better view.
 
-![Colage](https://github.com/MiquelNasarre/FourierS2/assets/124403865/09cb5a4e-1da1-42a6-b77b-6c1559bf8a05)
+![Colage](https://github.com/MiquelNasarre/FourierS2/assets/124403865/0ce9f90d-27cf-4c72-ad95-f2ed7e0d0436)
 
 This image shows for values of $\ell$ up to $5$, the program uses values up to $\ell=28$, with $|m|\leq\ell$. 
 
 With this capabilities it can render lots of triangularized surfaces, here in the next image you can see some 
 examples for $\ell\leq 20$.
 
-![collage2](https://github.com/MiquelNasarre/FourierS2/assets/124403865/c3f30c3a-8c91-41e3-8d45-50ff03338ed1)
+![collage2](https://github.com/MiquelNasarre/FourierS2/assets/124403865/eff4a0f8-7020-48ba-8694-64df05efa4ff)
 
 The figures on the right are the original triangularized surfaces, while the ones on the left are their Fourier 
 Series.
