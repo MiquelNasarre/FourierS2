@@ -66,7 +66,7 @@ at full screen by pressing `F11` to enter and `esc` to exit.
 Now lets go through its features. Upon running the program you are presented with the Spherical Harmonics, which will shows as 
 the only Figure loaded so far. The menu is located on the top left corner. The following image shows the menu as seen upon opening
 
-![menu0](https://github.com/MiquelNasarre/FourierS2/assets/124403865/30da0d36-d4e5-4870-9eaf-7b98ab33de75)
+![menu0](https://github.com/MiquelNasarre/FourierS2/assets/124403865/d7037e10-5070-4c23-94f5-e7ea279c047e)
 
 For this first plot you can use the sliders to change the $\ell$ end $m$ values, as said before the program uses $\ell\leq 28$ and 
 $|m|\leq\ell$. Up at the top bar we have different menus: 
@@ -75,7 +75,7 @@ $|m|\leq\ell$. Up at the top bar we have different menus:
 
 - The `Advanced` menu has two different options, it recommended to press the first option `Generate Dataset` upon starting the program.
   This will compute and store all the values for all the Spherical Harmonics in every point of our representation of the sphere. It will
-  take around 400MB on the RAM memory, but it will clearly improve the performance of the program.
+  take around 400MB on the RAM memory, but it will greatly improve the performance of the program.
 
   The other option, `Compute Errors`, once you have some surfaces loaded it will compute their $L^2$-error, comparing them with the
   original triangulations.
@@ -86,7 +86,7 @@ $|m|\leq\ell$. Up at the top bar we have different menus:
 Now lets load a figure into our program. If you click the load button a load menu will popup, up the top left you can choose between three 
 different options, `Figure`, `Coefficients` and `A Priori`:
 
-![load menus](https://github.com/MiquelNasarre/FourierS2/assets/124403865/7f141e31-0140-470c-88d8-110f9df91ecd)
+![load menus](https://github.com/MiquelNasarre/FourierS2/assets/124403865/992f8a3e-a720-4c5b-97b4-ad4602e97846)
 
 - `Figure` loads files from the _figures_ folder, which contains the triangulations, you can specify how many $\ell$ values you want as well
   as how many subdivisions should be done for each triangle. If the triangularization is already very fine, a higher depth might take a long
@@ -107,20 +107,29 @@ lets go through them:
 
 ![menu1](https://github.com/MiquelNasarre/FourierS2/assets/124403865/7b0de4bf-4107-4453-9db0-72f8e18b1395)
 
-- `Save Figure` will popup a save menu where you can write the name of the file, then your figures coefficients will be saved on the
+- `Create Interpolation`: This option will be available once you have at least two surfaces loaded, and it allows for the creation of
+  interpolations between them. Once you click it the interpolation editor will popup, and the main menu will change
+
+  ![imenus](https://github.com/MiquelNasarre/FourierS2/assets/124403865/c8a9512f-d082-49ac-80e8-bbfc2b0e4256)
+
+  The `Add Figure` selector allows you to introduce new surfaces to your intepolation, to delete them juct click on them on the list. To
+  save the interpolation name it and click save. Then through the main menu you will be able to change the $t$ value that interpolates the 
+  coefficients. Press `P` for the $t$ to change with time and adapt the speed with the arrow buttons.
+
+- `Save Figure`: Will popup a save menu where you can write the name of the file, then your figures coefficients will be saved on the
   _coefficients_ folder. This will work for any Forier Series, including the coefficients for any $t$ value of an interpolation.
 
-- `Single View / Double View`, if your surface is linked to a triangularization or viceversa both can be showed at the same time for
+- `Single View / Double View`: If your surface is linked to a triangularization or viceversa both can be showed at the same time for
   comparison or individually.
 
-- `Delete`, it deletes the current main view you have. It also erases it from memory. Keep in mind deleting some of them may erase features
+- `Delete`: It deletes the current main view you have. It also erases it from memory. Keep in mind deleting some of them may erase features
   from those linked to it, mainly for error computations and interpolations.
 
-- `Show Curves / Hide Curves` shows or hides the $\theta$ and $\varphi$ curves on the current surface for a fixed $(\varphi,\theta)$ point on
+- `Show Curves / Hide Curves`: Shows or hides the $\theta$ and $\varphi$ curves on the current surface for a fixed $(\varphi,\theta)$ point on
   $\mathbb{S}^2$. This feature can produce lag if it has to update the curves every frame, for example in a moving interpolation or if you
   are constantly changing the values of $\theta$ and $\varphi$, so discretion is advised.
 
-- `Coefficients` is not yet implemented, it is ment to be a visually clear way of viewing the fourier coefficients of any surface.
+- `Coefficients`: Is not yet implemented, it is ment to be a visually clear way of viewing the fourier coefficients of any surface.
 
 ## How it Works
 
@@ -130,7 +139,7 @@ This also means that it inherits the [ImGui](https://github.com/ocornut/imgui) d
 
 Therefore the Fourier project is built as an application of the previously mentioned repository. The main file just calls 
 the creation of a _Fourier_ class, which creates the window and runs it, calling the main loop until the window is closed. 
-Lets make a brief run through all its files before getting into its features.
+Lets make a brief run through all the _Fourier_ project files.
 
 - **Fourier.cpp / Fourier.h:** As mentioned this is the center class of our application. It is set to run at 60fps, and every 
   frame it processes all input events, and calls all the other functions needed to dysplay accordingly. The _processEvents_ 
@@ -156,3 +165,6 @@ Lets make a brief run through all its files before getting into its features.
 - **Interpolated.cpp / Interpolated.h:** This file constains two _Drawable_ classes used for creating the interpolations between
   different _FourierSurface_'s. the _Interpolated_ class contains a single interpolation between two surfaces and the
   _InterpolatedString_ class contains multiple instances of the previous one, to interpolate between any number of surfaces.
+
+## Math Involved
+
