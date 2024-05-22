@@ -220,7 +220,6 @@ Every drawable on our program then stores its own quaternion $q_0$, and if you w
 is as simple as multiplying both of them to obtain the updated rotation $q_0=q\ q_0$, and for every point it computes $P^r = q_0\ P\ q_0^\prime$ 
 to know its new position in $\mathbb{R}^3$.
 
-
 ### Representation of the Sphere
 
 Since we will be working on functions of the unit sphere it is important to have a good way to represent it with a finite amount of 
@@ -350,6 +349,8 @@ $$
 
 Using the fisrt one to get up to $P_m^m$ from $P_0^0 = 1$, then the second one to get $P_{m+1}^m$, 
 and finally the third one to get all the way to $P_\ell^m$.
+
+### Computation of the Fourier Coefficients
 
 ### Lighting the Surfaces and Diferentiation of the Spherical Harmonics
 
