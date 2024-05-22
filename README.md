@@ -94,7 +94,7 @@ different options, `Figure`, `Coefficients` and `A Priori`:
 
 - `Coefficients` loads files from the _coefficients_ folders, which store the coefficients of previously calculated series.
 
-- `A Priori` loads files from the _figures_ folder, first write the name of the file and load the triangulation. THen the error estimates
+- `A Priori` loads files from the _figures_ folder, first write the name of the file and load the triangulation. Then the error estimates
   formulas will be computed and you can select a certain error for you series. Using the formulas seen on the paper it will calculate enough
   coefficients to ensure that the error is below such threshold. You can also precompute some coefficients, which using the second theorem
   should give a more accurate estimate for the coefficients needed.
