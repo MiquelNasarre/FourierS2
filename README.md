@@ -352,3 +352,7 @@ Using the fisrt one to get up to $P_m^m$ from $P_0^0 = 1$, then the second one t
 and finally the third one to get all the way to $P_\ell^m$.
 
 ### Lighting the Surfaces and Diferentiation of the Spherical Harmonics
+
+### Norms & $L^2$-Error Computations
+
+### Interpolations
