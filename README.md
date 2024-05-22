@@ -1,29 +1,29 @@
 # Fourier Series for Triangulizations of Star-Shaped Surfaces
 
 This is the main project showcasing the formulas found on my universities final project. It handles the 
-formulas for the case in $L^2(\mathbb{S}^2)$, in particular for the case of triangularized surfaces.
+formulas for the case in $L^2(\mathbb{S}^2)$, in particular for the case of triangulated surfaces.
 
 To do that it follows the math found in the paper, caculating the Fourier coefficients of figures stored 
 in data files. Then computing the Fourier Series and displaying it in an interactive 3D view.
 
 The next image showcases the basis for the $L^2(\mathbb{S}^2)$ functions, the Spherical Harmonics, as seen 
-in the application. THe areas shaded in blue correspond to the positive values of the functions, and the 
-ones shaded in yellow to the negative. All values are made positive for better view.
+in the application. The areas shaded in blue correspond to the positive values of the functions, and the 
+ones shaded in yellow to the negative ones. All values are made positive for better view.
 
 ![Colage](https://github.com/MiquelNasarre/FourierS2/assets/124403865/0ce9f90d-27cf-4c72-ad95-f2ed7e0d0436)
 
 This image shows for values of $\ell$ up to $5$, the program uses values up to $\ell=28$, with $|m|\leq\ell$. 
 
-With this capabilities it can render lots of triangularized surfaces, here in the next image you can see some 
+With this capabilities it can render lots of triangulated surfaces, here in the next image you can see some 
 examples for $\ell\leq 20$.
 
 ![collage2](https://github.com/MiquelNasarre/FourierS2/assets/124403865/eff4a0f8-7020-48ba-8694-64df05efa4ff)
 
-The figures on the right are the original triangularized surfaces, while the ones on the left are their Fourier 
+The figures on the right are the original triangulated surfaces, while the ones on the left are their Fourier 
 Series.
 
-This kind of computations allows for a big reduction in size, since the Fourier coefficients weight considerably 
-less than the triangularizations, while maintaining a very small error. And also having it stored like this 
+This kind of computations allows for a big reduction in size, since the Fourier coefficients weigh considerably 
+less than their triangulations, while maintaining a very small error. And also having it stored like this 
 allows for easier compatibility. For example you can interpolate between surfaces just by interpolating coefficients, 
 or you can train AI much easier with a list of a couple hundred coefficients than with a fully triangulated surface.
 
@@ -55,7 +55,7 @@ need to modify the preprocessor definitions for the resource folders it uses.
 
 ## Features & Interactions
 
-Before going through all the widgets and how they work lets explore how to interact with directly with the plots. On any loaded 
+Before going through all the widgets and how they work lets explore how to interact directly with the plots. On any loaded 
 plot you can drag it around with the mouse, changing its orientation. You can use the mouse wheel to resize it, and if you use 
 it while holding the mouse button the figure will rotate on its axis.
 
@@ -68,7 +68,7 @@ the only Figure loaded so far. The menu is located on the top left corner. The f
 
 ![menu0](https://github.com/MiquelNasarre/FourierS2/assets/124403865/d7037e10-5070-4c23-94f5-e7ea279c047e)
 
-For this first plot you can use the sliders to change the $\ell$ end $m$ values, as said before the program uses $\ell\leq 28$ and 
+For this first plot you can use the sliders to change the $\ell$ and $m$ values, as said before the program uses $\ell\leq 28$ and 
 $|m|\leq\ell$. Up at the top bar we have different menus: 
 
 - The `Figure` menu displays the figures you have currently loaded in the program, once you load new files they will be displayed there.
@@ -89,7 +89,7 @@ different options, `Figure`, `Coefficients` and `A Priori`:
 ![load menus](https://github.com/MiquelNasarre/FourierS2/assets/124403865/992f8a3e-a720-4c5b-97b4-ad4602e97846)
 
 - `Figure` loads files from the _figures_ folder, which contains the triangulations, you can specify how many $\ell$ values you want as well
-  as how many subdivisions should be done for each triangle. If the triangularization is already very fine, a higher depth might take a long
+  as how many subdivisions should be done for each triangle. If the triangulation is already very fine, a higher depth might take a long
   time to process, it is advised to try first for smaller depth values.
 
 - `Coefficients` loads files from the _coefficients_ folders, which store the coefficients of previously calculated series.
@@ -119,7 +119,7 @@ lets go through them:
 - `Save Figure`: Will popup a save menu where you can write the name of the file, then your figures coefficients will be saved on the
   _coefficients_ folder. This will work for any Forier Series, including the coefficients for any $t$ value of an interpolation.
 
-- `Single View / Double View`: If your surface is linked to a triangularization or viceversa both can be showed at the same time for
+- `Single View / Double View`: If your surface is linked to a triangulation or viceversa both can be showed at the same time for
   comparison or individually.
 
 - `Delete`: It deletes the current main view you have. It also erases it from memory. Keep in mind deleting some of them may erase features
@@ -149,14 +149,14 @@ Lets make a brief run through all the _Fourier_ project files.
 - **IG_Fourier.cpp / IG_Fourier.h:** Since I wanted to keep separated the ImGui dependecies from the rest of my code this class 
   is the one that takes care of all the widgets. It comunicates with the _Fourier_ class only via the _IG_ struct.
 
-- **Polihedron.cpp / Polihedron.h:** This is a _Drawable_ class which is used to store the triangularized surfaces, and draw and 
+- **Polihedron.cpp / Polihedron.h:** This is a _Drawable_ class which is used to store the triangulated surfaces, and draw and 
   interact with them. Upon creation it also does some heavy computations. It calculates all the triangle projected areas, and the 
   angles within them, the normal vector of each triangle and it also creates a neighbourhood for each vertex. All of which are 
-  stored and can be called for future calculations involving the triangularization, as we will see later.
+  stored and can be called for future calculations that involve the triangulation, as we will see later.
 
 - **FourierSurface.cpp / FourierSurface.h:** This is a _Drawable_ class which is used to store the Fourier Series, and draw and
   interact with them. It also takes the main role with all the Fourier related computations. Upon creation it uses an existing
-  _Polihedron_ to compute its fourier coefficients, and its subclass _Functions_ takes care of all the math involved. This subclass
+  _Polihedron_ to compute its Fourier coefficients. Its subclass _Functions_ takes care of all the math involved. This subclass
   also contains the functions used to compute all the norms used for the error estimations.
 
   Within the _FourierSurface_ class we can also find the _FileManager_ class, which as the name indicates is used for file handling,
