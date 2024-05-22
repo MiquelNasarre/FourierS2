@@ -810,7 +810,7 @@ void		FourierSurface::generateIcosphere()
 	arista* aristas = (arista*)calloc(A, sizeof(arista));
 	triangle* triangles = (triangle*)calloc(C,sizeof(triangle));
 
-	float gold = (1.f + sqrtf(5) / 2.f);
+	float gold = (1.f + sqrtf(5)) / 2.f;
 
 	vertexs[ 0] = { 0.f, 1.f, gold };
 	vertexs[ 1] = { 0.f, 1.f,-gold };
@@ -1595,7 +1595,7 @@ void createShape(const char* filename)
 
 #pragma region create icosahedron
 
-	float gold = (1.f + sqrtf(5) / 2.f);
+	float gold = (1.f + sqrtf(5)) / 2.f;
 
 	vertexs[0] = { 0.f, 1.f, gold };
 	vertexs[1] = { 0.f, 1.f,-gold };

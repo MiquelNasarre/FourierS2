@@ -102,7 +102,7 @@ Fourier::Fourier()
 
 	harmonics.create(window.graphics, &C, 1u);
 	
-	//createShape("test");
+	//createShape("star");
 }
 
 int Fourier::Run()
