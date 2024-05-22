@@ -202,11 +202,11 @@ For a small explanation, if we want to rotate our figure around an axis represen
 angle $\theta$. We consider the quaternions 
 
 $$
-q = \cos\frac{\theta}{2} + v\cdot(i,j,k) \sin\frac{\theta}{2}
+q = \cos\frac{\theta}{2} + v\cdot(i,j,k)\ \sin\frac{\theta}{2}
 $$
 
 $$
-q^\prime = \cos\frac{\theta}{2} - v\cdot(i,j,k) \sin\frac{\theta}{2}
+q^\prime = \cos\frac{\theta}{2} - v\cdot(i,j,k)\ \sin\frac{\theta}{2}
 $$
 
 where $\cdot$ is the dot product. Then we can rotate any point $p\in\mathbb{R}^3$ by again converting it into a quaternion $P=p\cdot(i,j,k)$ 
@@ -258,26 +258,26 @@ Lets remember our expression for the spherical harmonics
 
 $$
 Y_\ell^m(\varphi,\theta) = \begin{cases}
-				\sqrt{\frac{2(2\ell + 1)(\ell - m)!}{2\pi(\ell + m)!}} 
-				P_\ell^m (\cos\theta) \cos(m\varphi) 
-				& \text{si }\ m>0
-				\\
-				\\
-				\sqrt{\frac{2\ell + 1}{4\pi}}P_\ell^0 (\cos\theta) 
-				& \text{si }\ m=0
-				\\
-				\\
-				\sqrt{\frac{2(2\ell + 1)(\ell - |m|)!}{2\pi(\ell + |m|)!}} 
-				P_\ell^{|m|} (\cos\theta) \sin(|m|\varphi)
-				& \text{si }\ m<0
-			\end{cases}
+	\sqrt{\frac{2(2\ell + 1)(\ell - m)!}{2\pi(\ell + m)!}} 
+	P_\ell^m (\cos\theta) \cos(m\varphi) 
+	& \text{si }\ m>0
+	\\
+	\\
+	\sqrt{\frac{2\ell + 1}{4\pi}}P_\ell^0 (\cos\theta) 
+	& \text{si }\ m=0
+	\\
+	\\
+	\sqrt{\frac{2(2\ell + 1)(\ell - |m|)!}{2\pi(\ell + |m|)!}} 
+	P_\ell^{|m|} (\cos\theta) \sin(|m|\varphi)
+	& \text{si }\ m<0
+\end{cases}
 $$
 
 We will divide the expression as in the paper and write $Y_\ell^m(\varphi,\theta) = K_\ell^m P_\ell^m(\cos\theta) \Upsilon_m(\varphi)$.
 
 The constants up front are calculated for all the $\ell$ and $m$ values upon starting the program. Here we can explore the limitant factor that 
-does not allow us to go further than $\ell=28$. For storing the values of any decimal number along the program we use _float_'s, this occupy $4$Bytes 
-in memory, and $8$bits of them are used for storing the power of two, the smallest prower of two it can store is $-127$. If we evaluate for example 
+does not allow us to go further than $\ell=28$. For storing the values of any decimal number along the program we use _float_'s, this occupy $4$ Bytes 
+in memory, and $8$ bits of them are used for storing the power of two, the smallest prower of two it can store is $-127$. If we evaluate for example 
 $K_{29}^{29}$ we obtain
 
 $$
@@ -287,6 +287,68 @@ $$
 Therefore such small value can not be stored in a _float_. This is not a complete limitation, since it would be as easy as using _double_'s which allow 
 for bigger precision, nevertheless $\ell\leq28$ allows $841$ coefficients, which I consider good enough for the purposes of this program.
 
-Now lets talk about $\Upsilon_m(\varphi)$,
+Since most of the time we will be evaluating the Spherical Harmonics on unitary vertexs it is convenient that we find expressions for the 
+trigonometric functions of $\varphi$ and $\theta$ only form the vector. Therefore first we compute, given $v=(x,y,z)\in\mathbb{S}^2$
 
+$$
+\cos\theta = z
+$$
 
+$$
+\sin\theta = \sqrt{1-z^2}
+$$
+
+$$
+\cos\varphi = \frac{x}{\sin\theta}
+$$
+
+$$
+\sin\varphi = \frac{y}{\sin\theta}
+$$
+
+To evaluate $\Upsilon_m(\varphi)$, as discussed in the paper, it uses the Chebyshev polynomials, with its identities
+
+$$
+T_n(\cos\theta) = \cos(n\theta)
+$$
+
+$$
+U_{n-1}(\cos\theta) \sin\theta = \sin(n\theta) 
+$$
+
+and its recurrences
+
+$$
+T_0(x) = 1,\ \ \ T_1(x) = x
+$$
+
+$$
+T_{n+1}(x) = 2xT_n(x) - T_{n-1}(x)
+$$
+
+$$
+U_0(x) = 1,\ \ \ U_1(x) = 2x
+$$
+
+$$
+U_{n+1}(x) = 2xU_n(x) - U_{n-1}(x)
+$$
+
+And to evaluate $P_\ell^m(\cos\theta)$, as discussed in the paper, it uses the following recurrences
+
+$$
+P_{\ell+1}^{\ell+1} (x) = -(2\ell - 1) \sqrt{1-x^2} P_\ell^\ell(x)
+$$
+
+$$
+P_{\ell+1}^\ell (x) =  x(2\ell+1)P_\ell^\ell(x)
+$$
+
+$$
+(\ell-m+1) P_{\ell+1}^m(x) = (2\ell+1)x P_\ell^m(x) - (\ell+m) P_{\ell-1}^m(x)
+$$
+
+Using the fisrt one to get up to $P_m^m$ from $P_0^0 = 1$, then the second one to get $P_{m+1}^m$, 
+and finally the third one to get all the way to $P_\ell^m$.
+
+### Lighting the Surfaces and Diferentiation of the Spherical Harmonics
