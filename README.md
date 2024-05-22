@@ -80,7 +80,7 @@ $|m|\leq\ell$. Up at the top bar we have different menus:
   The other option, `Compute Errors`, once you have some surfaces loaded it will compute their $L^2$-error, comparing them with the
   original triangulations.
 
-- The other twom menus `Lights` and `Textures` are just for aesthetics, as the names say allow you to change the lighting and textures of
+- The other two menus `Lights` and `Textures` are just for aesthetics, as the names say allow you to change the lighting and textures of
   your surfaces. Unfortunately you can not do that with the triangulations.
 
 Now lets load a figure into our program. If you click the load button a load menu will popup, up the top left you can choose between three 
