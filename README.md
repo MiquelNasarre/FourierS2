@@ -246,7 +246,7 @@ $\mathbb{S}^2$ for the rest of its runtime. Also these are the vertexs where the
 Given the parametrization of the sphere used on the paper
 
 $$
-\Phi:(0,2\pi)\times(0,\pi)\rightarrow\mathbb{S}^2\in\mathbb{R}^3
+\Phi:(0,2\pi)\times(0,\pi)\rightarrow\mathbb{S}^2\subset\mathbb{R}^3
 $$
 
 $$
