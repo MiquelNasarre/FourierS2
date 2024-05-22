@@ -75,7 +75,52 @@ $|m|\leq\ell$. Up at the top bar we have different menus:
 
 - The `Advanced` menu has two different options, it recommended to press the first option `Generate Dataset` upon starting the program.
   This will compute and store all the values for all the Spherical Harmonics in every point of our representation of the sphere. It will
-  take around 400MB on the RAM memory, but it will clearly iprove the performance of the program.
+  take around 400MB on the RAM memory, but it will clearly improve the performance of the program.
+
+  The other option, `Compute Errors`, once you have some surfaces loaded it will compute their $L^2$-error, comparing them with the
+  original triangulations.
+
+- The other twom menus `Lights` and `Textures` are just for aesthetics, as the names say allow you to change the lighting and textures of
+  your surfaces. Unfortunately you can not do that with the triangulations.
+
+Now lets load a figure into our program. If you click the load button a load menu will popup, up the top left you can choose between three 
+different options, `Figure`, `Coefficients` and `A Priori`:
+
+![load menus](https://github.com/MiquelNasarre/FourierS2/assets/124403865/7f141e31-0140-470c-88d8-110f9df91ecd)
+
+- `Figure` loads files from the _figures_ folder, which contains the triangulations, you can specify how many $\ell$ values you want as well
+  as how many subdivisions should be done for each triangle. If the triangularization is already very fine, a higher depth might take a long
+  time to process, it is advised to try first for smaller depth values.
+
+- `Coefficients` loads files from the _coefficients_ folders, which store the coefficients of previously calculated series.
+
+- `A Priori` loads files from the _figures_ folder, first write the name of the file and load the triangulation. THen the error estimates
+  formulas will be computed and you can select a certain error for you series. Using the formulas seen on the paper it will calculate enough
+  coefficients to ensure that the error is below such threshold. You can also precompute some coefficients, which using the second theorem
+  should give a more accurate estimate for the coefficients needed.
+
+  As remarked in the paper, such estimates can be wrong due to the approximations done. Nevertheless you can adjust the finness of the
+  triangurarization to ensure better results.
+
+Once a figure is loaded, if it comes from a triangularization it will display both of them, and some new options will be added to the menu, 
+lets go through them:
+
+![menu1](https://github.com/MiquelNasarre/FourierS2/assets/124403865/7b0de4bf-4107-4453-9db0-72f8e18b1395)
+
+- `Save Figure` will popup a save menu where you can write the name of the file, then your figures coefficients will be saved on the
+  _coefficients_ folder. This will work for any Forier Series, including the coefficients for any $t$ value of an interpolation.
+
+- `Single View / Double View`, if your surface is linked to a triangularization or viceversa both can be showed at the same time for
+  comparison or individually.
+
+- `Delete`, it deletes the current main view you have. It also erases it from memory. Keep in mind deleting some of them may erase features
+  from those linked to it, mainly for error computations and interpolations.
+
+- `Show Curves / Hide Curves` shows or hides the $\theta$ and $\varphi$ curves on the current surface for a fixed $(\varphi,\theta)$ point on
+  $\mathbb{S}^2$. This feature can produce lag if it has to update the curves every frame, for example in a moving interpolation or if you
+  are constantly changing the values of $\theta$ and $\varphi$, so discretion is advised.
+
+- `Coefficients` is not yet implemented, it is ment to be a visually clear way of viewing the fourier coefficients of any surface.
 
 ## How it Works
 
