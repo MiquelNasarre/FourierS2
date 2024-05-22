@@ -1,4 +1,4 @@
-# Fourier Series for Triangulizations of Star-Shaped Surfaces
+# Fourier Series for Triangulations of Star-Shaped Surfaces
 
 This is the main project showcasing the formulas found on my universities final project. It handles the 
 formulas for the case in $L^2(\mathbb{S}^2)$, in particular for the case of triangulated surfaces.
