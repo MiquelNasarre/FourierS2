@@ -352,7 +352,79 @@ and finally the third one to get all the way to $P_\ell^m$.
 
 ### Computation of the Fourier Coefficients
 
+The Fourier Series is given by the following expression
+
+$$
+r(\varphi,\theta) = \sum_{\ell\in L} \sum_{m=-\ell}^\ell r_\ell^m Y_\ell^m(\varphi,\theta)
+$$
+
+Where $r_\ell^m$ are the Fourier coefficients. This sum will be computed for every point of our sphere in order to 
+represent the surfaces. Befora that though we have to calculate the coefficients using our triangulation. Given a 
+triangulation $\{ T_i \}_{i=0}^N$, lets supose we already have our subset of frequencies selected, then for each 
+frequency given by $(\ell,m)$ we approximate
+
+$$
+r_\ell^m = \sum_{i=0}^{N} ||\overline{T}\_i ||\ Y_{\ell}^m\left(\overline{T}_i^p\right) A(T_i^p)
+$$
+
+where $\overline{T}_i$ denotes the baricenter of the triangle $T_i$, and $A(T_i^p)$ denotes the area of the spherical 
+triangle  $T_i^p$, created by the projection of the vertexs of $T_i$.
+
+We already have a way to compute the Spherical Harmonics, now lets calculate the other two summands. For each triangle 
+$T$ we have a collection of 3 vertexs $v_0,v_1,v_2\in\mathbb{R}^3$. The baricenter is just the mean of the vertexs
+
+$$
+\overline{T} = \frac{v_0 + v_1 + v_2}{3}
+$$
+
+Then the first summand is just its absolute value and the argument of the Spherical Harmonic is this vector divided by its 
+absolute value. 
+
+Finally we have to compute the area of the spherical triangles. As mentioned before, this area is calculated upon 
+the creation of the triangulation and stored, because we will be using it lots of times for other calculations. To compute 
+it, it uses the formula 
+
+$$
+A = \alpha_0 + \alpha_1 + \alpha_2 - \pi
+$$
+
+where $\alpha_0$, $\alpha_1$ and $\alpha_2$ are the interior angles of the spherical triangle. To calculate such angles we use 
+the following formulas
+
+$$
+\alpha_i = \arccos (u_{ij} \cdot u_{ik}) 
+$$
+
+$$
+u_{ij} = \frac{(v_i \times v_j) \times v_i}{||(v_i \times v_j) \times v_i||}
+$$
+
+Now we have the way to compute the coefficients. But lets remember that we can also set a depth value to make the triangulation 
+more fine. All that does is, before starting the calculations, it divides each triangle in $4$ equally sized triangles, the same 
+way as the icosphere, for every value of depth we add. Therefore every additional depth quadruples the amount of time it takes 
+to compute the coefficients, that is why caution is advised.
+
 ### Lighting the Surfaces and Diferentiation of the Spherical Harmonics
+
+As you can see, in the applications all the surfaces are lit up, and you can even change the lights position and color. But how 
+do you lit a Surface? Let me take this as an opportunity to explain how the _shaders_ in this program work.
+
+Every time you issue a draw call in the program, the set of all the vertexs of the figure you wanna draw, and all the indexes 
+that create the triangulation of your surface are loaded in your GPU. As well as the quaternion that represents the rotation of 
+the figure, the center screen position (for the single/double view), the scale, and each light with its position, intensities and color. 
+Each vertex contains the $\mathbb{R}^3$ point, the color of the vertex and a normal vector of the vertex. 
+
+We will consider the two most important steps of the rendering, first comes the vertex shader, where the position on the screen of 
+each vertex is calculated, given its $\mathbb{R}^3$ position, its rotation and the scale. Then for every pixel in every triangle given 
+by three vertexs it performs the pixel shader, that will return the color value of the pixel. 
+
+The inputs of the pixel shader are the interpolated $\mathbb{R}^3$ position between the vertexs, the interpolated normal vector 
+between the vertexs and the interpolated color of the vertexs. It also has the lights information. Then to compute the final color 
+it just sees how far away it is from each light source and to know how the light is hitting the surface it does the dot product 
+between the normal vector and the vector that goes from the point to the light normalized. Then it gives the color of the pixel 
+accordingly.
+
+Then a question arises, how do we calculate the normal vector of a surface? 
 
 ### Norms & $L^2$-Error Computations
 
