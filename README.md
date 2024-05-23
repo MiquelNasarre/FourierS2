@@ -216,8 +216,8 @@ $$
 P^r = q\ P\ q^\prime
 $$
 
-Every drawable on our program then stores its own quaternion $q_0$, and if you want to add any further rotations given by the quaternion $q$
-is as simple as multiplying both of them to obtain the updated rotation $q_0=q\ q_0$, and for every point it computes $P^r = q_0\ P\ q_0^\prime$ 
+Every drawable on our program then stores its own quaternion $q_0$, and if you want to add any further rotations given by the quaternion $q$,
+is as simple as multiplying both of them to obtain the updated rotation $q_0=q\ q_0$, and for every vertex it computes $P^r = q_0\ P\ q_0^\prime$ 
 to know its new position in $\mathbb{R}^3$.
 
 ### Representation of the Sphere
@@ -424,7 +424,68 @@ it just sees how far away it is from each light source and to know how the light
 between the normal vector and the vector that goes from the point to the light normalized. Then it gives the color of the pixel 
 accordingly.
 
-Then a question arises, how do we calculate the normal vector of a surface? 
+Then a question arises, how do we calculate the normal vector of a surface? Normally for a point on any given parametrized surface 
+the renderer calculates four extra points really close to the one prior, by slightly modifying the two parameters, then it does the 
+vector difference to get the a basis for the tangent space and performs the vector product to finally obtain the normal vector.
+
+However, given the fact that the surfaces we will be computing are always Fourier Series, and the amount of computation it takes to 
+calculate each point, it is best to derivate the Spherical Harmonics mathematically and get the normal vector without having to 
+calculate any extra points. The math is detailed in the paper, lets parametrize our surface by 
+$\sigma:(0,2\pi)\times(0,\pi)\rightarrow\mathbb{S}^2\subset\mathbb{R}^3$ where
+
+$$
+\sigma(\varphi,\theta) = \Phi(\varphi,\theta)r(\varphi,\theta) = \Phi(\varphi,\theta) 
+\sum_{\ell\in L} \sum_{m=-\ell}^\ell r_\ell^m Y_\ell^m(\varphi,\theta)
+$$
+
+Then the normal vector can by calculated by
+
+$$
+N = \frac{\partial_\theta\sigma \times \partial_\varphi\sigma}{||\partial_\theta\sigma \times \partial_\varphi\sigma||}
+$$
+
+calculated with the following expressions
+
+$$
+\partial_\theta\sigma \times \partial_\varphi\sigma = 
+r \cdot \left(-\partial_\theta r\ \sin\theta\cos\theta\cos\varphi + \partial_\varphi r\ \sin\varphi + r\ \sin^2\theta\cos\varphi,\ 
+-\partial_\theta r\ \sin\theta\cos\theta\sin\varphi - \partial_\varphi r\ \cos\varphi+ r\ \sin^2\theta\sin\varphi,\ 
+\partial_\theta r\ \sin^2\theta + r\ \sin\theta\cos\theta\right)
+$$
+
+$$
+\partial_\varphi r = \sum_{m=-\ell}^\ell r_\ell^m\ \partial_\varphi Y_\ell^m(\varphi,\theta)
+$$
+
+$$
+\partial_\theta r = \sum_{m=-\ell}^\ell r_\ell^m\ \partial_\theta Y_\ell^m(\varphi,\theta)
+$$
+
+$$
+\partial_\varphi Y_\ell^m(\varphi,\theta) = -m K_\ell^m P_\ell^m(\cos\theta) \Upsilon_{-m}(\varphi)
+$$
+
+$$
+\partial_\theta Y_\ell^m(\varphi,\theta) = -\sin\theta\ K_\ell^m (P_\ell^m)^\prime(\cos\theta) \Upsilon_m(\varphi)
+$$
+
+And to derivate the associated Legendre polinomials it uses the identities
+
+$$
+(1 - x^2) \frac{d}{dx}P_\ell^m(x) = (\ell + m)P_{\ell-1}^m(x) - \ell x P_\ell^m(x)
+$$
+
+$$
+(1 - x^2) \frac{d}{dx}P_\ell^\ell(x) = - \ell x P_\ell^\ell(x)
+$$
+
+That way, when generating the dataset, at each point it also calculates and stores the values of the partial derivatives with respect 
+to $\varphi$ and $\theta$, allowing for an easy calculation of the normal vector of any surface given by a Fourier Series. 
+
+This way of computing the normal vector however, has a problem. Since our parametrization is not well defined on the poles, 
+and we are using it to calculate the normal vector, our normal vector is not well defined on the poles of the surface. 
+Therefore in the program when you load some of the triangulations you will clearly see that the surfaces it creates are not 
+correctly lit at their poles.
 
 ### Norms & $L^2$-Error Computations
 
