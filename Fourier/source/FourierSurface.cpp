@@ -10,7 +10,7 @@ unsigned int	FourierSurface::ntriangles = 0;
 unsigned int	FourierSurface::nvertexs = 0;
 
 unsigned int	FourierSurface::Functions::maxL = MAX_L;
-float**			FourierSurface::Functions::Constants = NULL;
+const float**	FourierSurface::Functions::Constants = NULL;
 Vector3f***		FourierSurface::Functions::DatasetYlmi = (Vector3f***)calloc(MAX_L + 1, sizeof(void*));
 
 // File Manager Functions
@@ -273,8 +273,13 @@ float			FourierSurface::Functions::Ylm(Vector3f v, unsigned int l, int m)
 {
 	float costheta = v.z;
 	float sintheta = sqrtf(1 - v.z * v.z);
-	float cosphi = v.x / sintheta;
-	float sinphi = v.y / sintheta;
+	float cosphi = 1.f;
+	float sinphi = 0.f;
+	if (sintheta != 0.f)
+	{
+		cosphi = v.x / sintheta;
+		sinphi = v.y / sintheta;
+	}
 
 	if (m > 0)
 		return Klm(l, m) * Functions::Tchev(m, cosphi) * Functions::Legendre(l, m, costheta);
@@ -652,22 +657,25 @@ float			FourierSurface::Functions::Klm(unsigned int l, int m)
 
 void			FourierSurface::Functions::generateConstants()
 {
-	Constants = (float**)calloc(maxL + 1, sizeof(void*));
+	float** constants = (float**)calloc(maxL + 1, sizeof(void*));
 	for (unsigned int l = 0; l <= maxL; l++)
 	{
-		Constants[l] = (float*)calloc(l + 1, sizeof(float));
+		constants[l] = (float*)calloc(l + 1, sizeof(float));
 
-		Constants[l][0] = sqrtf(float(2 * l + 1));
+		constants[l][0] = sqrtf(float(2 * l + 1));
 		for (unsigned int m = 1; m <= l; m++)
-			Constants[l][m] = sqrtf(float(2 * (2 * l + 1))) / Functions::sqDivFactorial(l + m, l - m);
+			constants[l][m] = sqrtf(float(2 * (2 * l + 1))) / Functions::sqDivFactorial(l + m, l - m);
 	}
+	Constants = (const float**)constants;
 }
 
-float			FourierSurface::Functions::D0norm(Polihedron* figure, FourierSurface* surface)
+float			FourierSurface::Functions::D0norm(Polihedron* figure, FourierSurface* surface, bool* kill)
 {
 	const Vector3f* vertexs = figure->getVertexs();
+	const Vector3f* sphere = figure->getSpherePoints();
 	const Vector3i* triangles = figure->getTriangles();
 	const float* areas = figure->getAreaTriangles();
+	const float* vertexsNorms = figure->getVertexsNorms();
 	const unsigned int numT = figure->getNumTriangles();
 	const unsigned int numV = figure->getNumVertexs();
 
@@ -676,9 +684,15 @@ float			FourierSurface::Functions::D0norm(Polihedron* figure, FourierSurface* su
 		Vector3f* tvertexs = (Vector3f*)calloc(numV, sizeof(Vector3f));
 		for (unsigned int i = 0; i < numV; i++)
 		{
-			float abs = vertexs[i].abs();
-			tvertexs[i] = vertexs[i] / abs * (abs - surface->getValueAt(vertexs[i] / abs));
+			tvertexs[i] = sphere[i] * (vertexsNorms[i] - surface->getValueAt(sphere[i]));
+			if (kill && *kill)
+			{
+				free(tvertexs);
+				return -1.f;
+			}
+
 		}
+
 		vertexs = tvertexs;
 	}
 
@@ -691,6 +705,13 @@ float			FourierSurface::Functions::D0norm(Polihedron* figure, FourierSurface* su
 		Vector3f V3 = vertexs[triangles[i].z];
 		float center = ((V1 + V2 + V3) / 3.f).abs();
 		norm += areas[i] * center * center;
+		if (kill && *kill)
+		{
+			if(surface)
+				free((Vector3f*)vertexs);
+			return -1.f;
+		}
+
 	}
 
 	if (surface)
@@ -699,12 +720,14 @@ float			FourierSurface::Functions::D0norm(Polihedron* figure, FourierSurface* su
 	return norm;
 }
 
-float			FourierSurface::Functions::D1norm(Polihedron* figure, FourierSurface* surface)
+float			FourierSurface::Functions::D1norm(Polihedron* figure, FourierSurface* surface, bool* kill)
 {
 	const Vector3f* vertexs = figure->getVertexs();
+	const Vector3f* sphere = figure->getSpherePoints();
 	const Vector3i* triangles = figure->getTriangles();
 	const Vector3f* normals = figure->getNormals();
 	const float* areas = figure->getAreaTriangles();
+	const float* vertexsNorms = figure->getVertexsNorms();
 	const unsigned int numT = figure->getNumTriangles();
 	const unsigned int numV = figure->getNumVertexs();
 
@@ -713,9 +736,15 @@ float			FourierSurface::Functions::D1norm(Polihedron* figure, FourierSurface* su
 		Vector3f* tvertexs = (Vector3f*)calloc(numV, sizeof(Vector3f));
 		for (unsigned int i = 0; i < numV; i++)
 		{
-			float abs = vertexs[i].abs();
-			tvertexs[i] = vertexs[i] / abs * (abs - surface->getValueAt(vertexs[i] / abs));
+			tvertexs[i] = sphere[i] * (vertexsNorms[i] - surface->getValueAt(sphere[i]));
+			if (kill && *kill)
+			{
+				free(tvertexs);
+				return -1.f;
+			}
+
 		}
+
 		vertexs = tvertexs;
 	}
 
@@ -729,6 +758,12 @@ float			FourierSurface::Functions::D1norm(Polihedron* figure, FourierSurface* su
 		float center = ((V1 + V2 + V3) / 3.f).abs();
 		float prod = (normals[i] ^ ((V1 + V2 + V3) / 3.f));
 		norm += areas[i] * center * center * ((center * center) / (prod * prod) - 1.f);
+		if (kill && *kill)
+		{
+			if (surface)
+				free((Vector3f*)vertexs);
+			return -1.f;
+		}
 	}
 
 	if (surface)
@@ -737,11 +772,13 @@ float			FourierSurface::Functions::D1norm(Polihedron* figure, FourierSurface* su
 	return norm;
 }
 
-float			FourierSurface::Functions::D2norm(Polihedron* figure, FourierSurface* surface)
+float			FourierSurface::Functions::D2norm(Polihedron* figure, FourierSurface* surface, bool* kill)
 {
 	const Vector3f* vertexs = figure->getVertexs();
+	const Vector3f* sphere = figure->getSpherePoints();
 	const Vector3i* triangles = figure->getTriangles();
 	const float* areas = figure->getAreaTriangles();
+	const float* vertexsNorms = figure->getVertexsNorms();
 	const unsigned int numT = figure->getNumTriangles();
 	const unsigned int numV = figure->getNumVertexs();
 
@@ -753,11 +790,19 @@ float			FourierSurface::Functions::D2norm(Polihedron* figure, FourierSurface* su
 	if (surface)
 	{
 		Vector3f* tvertexs = (Vector3f*)calloc(numV, sizeof(Vector3f));
+		float* tnorms = (float*)calloc(numV, sizeof(float));
 		for (unsigned int i = 0; i < numV; i++)
 		{
-			float abs = vertexs[i].abs();
-			tvertexs[i] = vertexs[i] / abs * (abs - surface->getValueAt(vertexs[i] / abs));
+			tnorms[i] = vertexsNorms[i] - surface->getValueAt(sphere[i]);
+			tvertexs[i] = sphere[i] * tnorms[i];
+			if (kill && *kill)
+			{
+				free(tnorms);
+				free(tvertexs);
+				return -1.f;
+			}
 		}
+		vertexsNorms = tnorms;
 		vertexs = tvertexs;
 	}
 
@@ -770,14 +815,26 @@ float			FourierSurface::Functions::D2norm(Polihedron* figure, FourierSurface* su
 		for (unsigned int j = 0; j < valencies[i]; j++)
 		{
 			float weight = (nangles[i][2 * ((j - 1 + valencies[i]) % valencies[i]) + 1] + nangles[i][2 * ((j + 1) % valencies[i])]);
-			sumnum += (vertexs[neighbours[i][j]].abs() - vertexs[i].abs()) * weight;
-			sumden += (vertexs[neighbours[i][j]] / vertexs[neighbours[i][j]].abs() - vertexs[i] / vertexs[i].abs()).abs() * weight;
+			sumnum += (vertexsNorms[neighbours[i][j]] - vertexsNorms[i]) * weight;
+			sumden += (sphere[neighbours[i][j]] - sphere[i]).abs() * weight;
 		}
 		norm += vertexsWeight[i] * (16 * sumnum * sumnum) / (sumden * sumden);
+		if (kill && *kill)
+		{
+			if (surface)
+			{
+				free((Vector3f*)vertexs);
+				free((float*)vertexsNorms);
+			}
+			return -1.f;
+		}
 	}
 
 	if (surface)
+	{
 		free((Vector3f*)vertexs);
+		free((float*)vertexsNorms);
+	}
 
 	return norm;
 }
@@ -1329,7 +1386,7 @@ FourierSurface::Vertex* FourierSurface::getVertexPtr()
 	return Vertexs;
 }
 
-Coefficient* FourierSurface::getCoefficients()
+Coefficient*	FourierSurface::getCoefficients()
 {
 	return Coef;
 }
@@ -1339,7 +1396,7 @@ unsigned int	FourierSurface::getNcoefficients()
 	return Ncoef;
 }
 
-float FourierSurface::getValueAt(Vector3f P)
+float			FourierSurface::getValueAt(Vector3f P)
 {
 	float value = 0.f;
 	for (unsigned int j = 0u; j < Ncoef; j++)

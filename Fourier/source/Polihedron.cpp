@@ -23,6 +23,8 @@ Polihedron::~Polihedron()
 		free(areaTriangles);
 		free(Normals);
 		free(vertexsWeight);
+		free(Sphere);
+		free(vertexsNorms);
 	}
 }
 
@@ -137,10 +139,18 @@ void Polihedron::generateNeighbourhood()
 {
 	areaTriangles = (float*)calloc(numTriangles, sizeof(float));
 	vertexsWeight = (float*)calloc(numVertexs, sizeof(float));
+	vertexsNorms = (float*)calloc(numVertexs, sizeof(float));
 	neighbours = (int**)calloc(numVertexs, sizeof(void*));
 	neighboursAngles = (float**)calloc(numVertexs, sizeof(void*));
 	valencia = (unsigned int*)calloc(numVertexs, sizeof(int));
+	Sphere = (Vector3f*)calloc(numVertexs, sizeof(Vector3f));
 	Normals = (Vector3f*)calloc(numTriangles, sizeof(Vector3f));
+
+	for (unsigned int i = 0; i < numVertexs; i++)
+	{
+		vertexsNorms[i] = Vertexs[i].abs();
+		Sphere[i] = Vertexs[i] / vertexsNorms[i];
+	}
 
 	for (unsigned int i = 0; i < numTriangles; i++)
 	{
@@ -697,6 +707,11 @@ const Vector3f* Polihedron::getVertexs() const
 	return Vertexs;
 }
 
+const Vector3f* Polihedron::getSpherePoints() const
+{
+	return Sphere;
+}
+
 const Vector3i* Polihedron::getTriangles() const
 {
 	return Triangles;
@@ -740,4 +755,9 @@ const float* Polihedron::getAreaTriangles() const
 const float* Polihedron::getVertexsWeight() const
 {
 	return vertexsWeight;
+}
+
+const float* Polihedron::getVertexsNorms() const
+{
+	return vertexsNorms;
 }

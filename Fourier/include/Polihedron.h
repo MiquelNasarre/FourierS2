@@ -26,6 +26,7 @@ public:
 	Quaternion getRotation() const;
 	Vector3f getPosition() const;
 	const Vector3f* getVertexs() const;
+	const Vector3f* getSpherePoints() const;
 	const Vector3i* getTriangles() const;
 	const Vector3f* getNormals() const;
 	unsigned int getNumTriangles() const;
@@ -35,6 +36,7 @@ public:
 	const float** getNeighboursAngles() const;
 	const float* getAreaTriangles() const;
 	const float* getVertexsWeight() const;
+	const float* getVertexsNorms() const;
 
 private:
 	int** neighbours = NULL;
@@ -42,8 +44,10 @@ private:
 	float** neighboursAngles = NULL;
 	float* areaTriangles = NULL;
 	float* vertexsWeight = NULL;
+	float* vertexsNorms = NULL;
 	Vector3f* Normals = NULL;
 	Vector3f* Vertexs = NULL;
+	Vector3f* Sphere = NULL;
 	Vector3i* Triangles = NULL;
 	unsigned int numTriangles = 0u;
 	unsigned int numVertexs = 0u;

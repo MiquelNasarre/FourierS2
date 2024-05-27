@@ -57,13 +57,13 @@ public:
 		static float sqDivFactorial(int n, int m);
 
 		static unsigned int maxL;
-		static float** Constants;
+		static const float** Constants;
 		static float Klm(unsigned int l, int m);
 		static void generateConstants();
 
-		static float D0norm(Polihedron* figure, FourierSurface* surface = NULL);
-		static float D1norm(Polihedron* figure, FourierSurface* surface = NULL);
-		static float D2norm(Polihedron* figure, FourierSurface* surface = NULL);
+		static float D0norm(Polihedron* figure, FourierSurface* surface = NULL, bool* kill = NULL);
+		static float D1norm(Polihedron* figure, FourierSurface* surface = NULL, bool* kill = NULL);
+		static float D2norm(Polihedron* figure, FourierSurface* surface = NULL, bool* kill = NULL);
 	};
 private:
 

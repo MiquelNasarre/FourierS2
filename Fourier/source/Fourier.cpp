@@ -312,75 +312,109 @@ void Fourier::eventManager()
 
 	// Error estimates
 
-	if (IG::UPDATE_PRECOMPUTE)
+	if (IG::UPDATE_PRECOMPUTE && !normsFinished)
 	{
-		IG::UPDATE_PRECOMPUTE = false;
-		if (errorSurface)
-			errorSurface->~FourierSurface();
-		free(errorSurface);
-		errorSurface = NULL;
-
-		if (IG::PRECOMPUTE != -1)
+		kill = true;
+		if (Fecoef)
 		{
-			errorSurface = new(FourierSurface);
-
-			std::thread(calculateCoefficientsAsync, &coef, (const Polihedron**)&DataPlots[IG::COPY], IG::PRECOMPUTE, &Fecoef, nullptr).detach();
+			free(coef);
+			Fecoef = false;
+			kill = false;
+			normsFinished = true;
+		}
+		if (Fsplot)
+		{
+			Fsplot = false;
+			kill = false;
+			normsFinished = true;
+			if (extractedFigure)
+			{
+				free((void*)extractedFigure[2]);
+				free(extractedFigure);
+				extractedFigure = NULL;
+			}
 		}
 	}
-	if (Fecoef)
+	else
 	{
-		Fecoef = false;
-		errorSurface->updateCoefficients(coef, (IG::PRECOMPUTE + 1) * (IG::PRECOMPUTE + 1));
-		IG::COMPUTE_NORMS = true;
-		IG::ALREADY_EXISTS = true;
-		free(coef);
-	}
-
-	if (IG::COMPUTE_NORMS)
-	{
-		IG::COMPUTE_NORMS = false;
-		IG::NORMS[0] = -1.f;
-		IG::NORMS[1] = -1.f;
-		IG::NORMS[2] = -1.f;
-
-		if (IG::ALREADY_EXISTS)
+		if (IG::UPDATE_PRECOMPUTE)
 		{
-			Fsplot = true;
+			normsFinished = false;
+
+			IG::NORMS[0] = -1.f;
+			IG::NORMS[1] = -1.f;
+			IG::NORMS[2] = -1.f;
+
+			IG::UPDATE_PRECOMPUTE = false;
+			if (errorSurface)
+				errorSurface->~FourierSurface();
+			free(errorSurface);
+			errorSurface = NULL;
+
+			if (IG::PRECOMPUTE != -1)
+			{
+				errorSurface = new(FourierSurface);
+
+				std::thread(calculateCoefficientsAsync, &coef, (const Polihedron**)&DataPlots[IG::COPY], IG::PRECOMPUTE, &Fecoef, nullptr).detach();
+			}
 		}
-		else
+		if (Fecoef)
 		{
-			extractedFigure = FourierSurface::FileManager::extractFigureFromFile(IG::FILENAME);
-			add1to(DataPlots, IG::NPLOT);
-			DataPlots[IG::NPLOT] = new(Polihedron);
-			std::thread(createPlotAsync, &window.graphics, DataPlots[IG::NPLOT], extractedFigure, &Fsplot, &mtx).detach();
-		}
-
-	}
-
-	if (Fsplot)
-	{
-		Fsplot = false;
-
-		if (IG::ALREADY_EXISTS)
-		{
-			IG::ALREADY_EXISTS = false;
-			IG::VIEW1 = -IG::COPY - 2;
-		}
-		else
-		{
-			IG::NPLOT++;
-			IG::VIEW1 = -int(IG::NPLOT) - 1;
-		}
-		if (extractedFigure)
-		{
-			free((void*)extractedFigure[2]);
-			free(extractedFigure);
-			extractedFigure = NULL;
+			Fecoef = false;
+			errorSurface->updateCoefficients(coef, (IG::PRECOMPUTE + 1) * (IG::PRECOMPUTE + 1));
+			IG::COMPUTE_NORMS = true;
+			IG::ALREADY_EXISTS = true;
+			free(coef);
 		}
 
-		IG::DOUBLE_VIEW = false;
+		if (IG::COMPUTE_NORMS)
+		{
+			normsFinished = false;
 
-		std::thread(computeNormsAsync, DataPlots[IG::COPY], IG::NORMS, errorSurface).detach();
+			IG::COMPUTE_NORMS = false;
+			IG::NORMS[0] = -1.f;
+			IG::NORMS[1] = -1.f;
+			IG::NORMS[2] = -1.f;
+
+			if (IG::ALREADY_EXISTS)
+			{
+				Fsplot = true;
+			}
+			else
+			{
+				extractedFigure = FourierSurface::FileManager::extractFigureFromFile(IG::FILENAME);
+				add1to(DataPlots, IG::NPLOT);
+				DataPlots[IG::NPLOT] = new(Polihedron);
+				std::thread(createPlotAsync, &window.graphics, DataPlots[IG::NPLOT], extractedFigure, &Fsplot, &mtx).detach();
+			}
+
+		}
+
+		if (Fsplot)
+		{
+			Fsplot = false;
+
+			if (IG::ALREADY_EXISTS)
+			{
+				IG::ALREADY_EXISTS = false;
+				IG::VIEW1 = -IG::COPY - 2;
+			}
+			else
+			{
+				IG::NPLOT++;
+				IG::VIEW1 = -int(IG::NPLOT) - 1;
+			}
+			if (extractedFigure)
+			{
+				free((void*)extractedFigure[2]);
+				free(extractedFigure);
+				extractedFigure = NULL;
+			}
+
+			IG::DOUBLE_VIEW = false;
+
+			std::thread(computeNormsAsync, DataPlots[IG::COPY], IG::NORMS, errorSurface, &normsFinished, &kill, &mtx).detach();
+		}
 	}
 
 	// Multithread
@@ -806,9 +840,48 @@ void Fourier::computeErrorsAsync(FourierSurface* surface, Polihedron* poli, floa
 	*finished = true;
 }
 
-void Fourier::computeNormsAsync(Polihedron* poli, float* results, FourierSurface* surface)
+void Fourier::computeNormsAsync(Polihedron* poli, float* results, FourierSurface* surface, bool* finished, bool* kill, std::mutex* mtx)
 {
+	*finished = false;
+
 	results[0] = FourierSurface::Functions::D0norm(poli, surface);
+	if (mtx)
+		mtx->lock();
+	if (kill && *kill)
+	{
+		*kill = false;
+		*finished = true;
+		if (mtx)
+			mtx->unlock();
+		return;
+	}
+	if (mtx)
+		mtx->unlock();
 	results[1] = FourierSurface::Functions::D1norm(poli, surface);
+	if (mtx)
+		mtx->lock();
+	if (kill && *kill)
+	{
+		*kill = false;
+		*finished = true;
+		if (mtx)
+			mtx->unlock();
+		return;
+	}
+	if (mtx)
+		mtx->unlock();
 	results[2] = FourierSurface::Functions::D2norm(poli, surface);
+	if (mtx)
+		mtx->lock();
+	if (kill && *kill)
+	{
+		*kill = false;
+		*finished = true;
+		if (mtx)
+			mtx->unlock();
+		return;
+	}
+	if (mtx)
+		mtx->unlock();
+	*finished = true;
 }

@@ -243,20 +243,32 @@ void IG_Fourier::loadMenu()
 						norm = IG::NORMS[0];
 					}
 				}
-				if(IG::NORMS[0] == -1.f)
-					ImGui::Text("||S||        ....");
+
+				bool norms = true;
+				if (IG::NORMS[0] == -1.f)
+				{
+					ImGui::Text("||S||            ....");
+					norms = false;
+				}
+
 				else
-					ImGui::Text("||S||        %.4f", IG::NORMS[0]);
+					ImGui::Text("||S||            %.4f", IG::NORMS[0]);
 				
 				if (IG::NORMS[1] == -1.f)
-					ImGui::Text("||dS||       ....");
+				{
+					ImGui::Text("||dS||           ....");
+					norms = false;
+				}
 				else
-					ImGui::Text("||dS||       %.4f", IG::NORMS[1]);
+					ImGui::Text("||dS||           %.4f", IG::NORMS[1]);
 
 				if (IG::NORMS[2] == -1.f)
-					ImGui::Text("||DS||       ....");
+				{
+					ImGui::Text("||DS||           ....");
+					norms = false;
+				}
 				else
-					ImGui::Text("||DS||       %.4f", IG::NORMS[2]);
+					ImGui::Text("||DS||           %.4f", IG::NORMS[2]);
 
 				static int T = 0;
 				ImGui::InputInt(" Depth", &T);
@@ -268,8 +280,8 @@ void IG_Fourier::loadMenu()
 
 				ImGui::InputFloat(" Error", &error, 0.f, 0.f, "%.5f", ImGuiInputTextFlags_AutoSelectAll);
 				if (error < 0.f) error = -error;
-				if (error == 0.f)
-					ImGui::Text("MaxL        NDF");
+				if (error == 0.f || !norms)
+					ImGui::Text("MaxL            NDF");
 				else
 				{
 					float top;
@@ -279,14 +291,16 @@ void IG_Fourier::loadMenu()
 						top = (IG::NORMS[1] + sqrtf(IG::NORMS[0] * IG::NORMS[2] - IG::NORMS[1] * IG::NORMS[1]) / (error * norm / IG::NORMS[0])) / IG::NORMS[0];
 					IG::MAXL = int(0.5f + sqrtf(0.25f + top)) + 1;
 					if(sqrtf(0.25f + top) < 12403941207)
-						ImGui::Text("MaxL        %i", IG::MAXL);
+						ImGui::Text("MaxL            %i", IG::MAXL);
 					else
-						ImGui::Text("MaxL        NDF");
+						ImGui::Text("MaxL            NDF");
 
 					if (IG::MAXL > 28 || IG::MAXL < 0)
 						IG::MAXL = 28;
 				}
 				ImGui::Spacing();
+				if (!norms)
+					ImGui::BeginDisabled();
 				if (ImGui::Button("Load", ImVec2(89, 19)) || (ImGui::IsKeyPressed(ImGuiKey_Enter) && error != 0.f))
 				{
 					IG::COPY = -int(IG::NPLOT) - 1;
@@ -311,6 +325,8 @@ void IG_Fourier::loadMenu()
 					loadMenuOpen = false;
 					figureLoaded = false;
 				}
+				if (!norms)
+					ImGui::EndDisabled();
 				ImGui::SetCursorPos(ImVec2(ImGui::GetCursorPosX() + 95.f, ImGui::GetCursorPosY() - 23.f));
 				if (ImGui::Button("Cancel", ImVec2(89, 19)))
 				{

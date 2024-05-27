@@ -128,6 +128,8 @@ private:
 
 	//	Surface for error
 
+	bool normsFinished = true;
+	bool kill = false;
 	FourierSurface* errorSurface = NULL;
 
 	//	Interpolations
@@ -150,7 +152,7 @@ private:
 	static void createFigureAsync(Graphics* gfx, FourierSurface* figure, Coefficient** coef, unsigned int ncoef, bool* done, std::mutex* mtx, bool* begin);
 	static void calculateCoefficientsAsync(Coefficient** coef, const Polihedron** Figure, unsigned int maxL, bool* done, bool* begin = NULL);
 	static void computeErrorsAsync(FourierSurface* surface, Polihedron* poli, float* result, bool* finished, bool* cancel);
-	static void computeNormsAsync(Polihedron* poli, float* results, FourierSurface* surface);
+	static void computeNormsAsync(Polihedron* poli, float* results, FourierSurface* surface, bool* finished, bool* kill = NULL, std::mutex* mtx = NULL);
 
 public:
 	Fourier();
