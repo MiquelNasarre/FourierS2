@@ -548,9 +548,6 @@ The program is not still fully finished and there are some future plans for it, 
 - **Coefficients view feature:** It is a difficult concept to conceive, an intuitive way to view the set of coefficients
   $L\subset \mathbb{Z}^2$, so for the moment this feature is a plan for the future.
 
-- **Bugs related to the norm computations:** Sometimes the program fails to calculate properly the norms for some of the triangulations,
-  giving infinite or undefined values, there is some debugging and math to be done there.
-
 - **Size efficient storage of the files:** Since one of the benefits I said of using such series is the reduction in size of the
   files it would be interesting to explore the subject and try to store the files as efficiently as possible, and see how far it can get.
 
