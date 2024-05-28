@@ -543,7 +543,9 @@ of the curves it does it the non-efficient way, and that is why it can produce l
 The program is not still fully finished and there are some future plans for it, here I will discuss some of the most important ones.
 
 - **More efficient Spherical Harmonics calculations:** There are some ways where the calculations can be improved, for example every
-  associated Legendre polynomial is calculated twice, for the positive and negative value of $m$, which is clearly inefficient.
+  associated Legendre polynomial is calculated twice, for the positive and negative value of $m$, which is clearly inefficient. A much
+  bigger improvement though, would be calulating the Spherical Harmonics using polinomials as described in the paper. That would mean
+  completely changing the way they are currently being calculated, but it would really improve performance.
 
 - **Coefficients view feature:** It is a difficult concept to conceive, an intuitive way to view the set of coefficients
   $L\subset \mathbb{Z}^2$, so for the moment this feature is a plan for the future.
