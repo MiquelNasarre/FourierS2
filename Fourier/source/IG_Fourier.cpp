@@ -98,7 +98,7 @@ void IG_Fourier::loadMenu()
 
 		if(apriori && figureLoaded)
 		{
-			ImGui::SetWindowSize(ImVec2(200, 218));
+			ImGui::SetWindowSize(ImVec2(200, 226));
 			ImGui::SetWindowPos(ImVec2(IG::WindowDim.x / 2.f - 100, IG::WindowDim.y / 2.f - 109));
 		}
 
@@ -244,6 +244,7 @@ void IG_Fourier::loadMenu()
 					}
 				}
 
+				ImGui::Spacing();
 				bool norms = true;
 				if (IG::NORMS[0] == -1.f)
 				{
@@ -269,6 +270,7 @@ void IG_Fourier::loadMenu()
 				}
 				else
 					ImGui::Text("||DS||           %.4f", IG::NORMS[2]);
+				ImGui::Spacing();
 
 				static int T = 0;
 				ImGui::InputInt(" Depth", &T);
@@ -303,7 +305,28 @@ void IG_Fourier::loadMenu()
 					ImGui::BeginDisabled();
 				if (ImGui::Button("Load", ImVec2(89, 19)) || (ImGui::IsKeyPressed(ImGuiKey_Enter) && error != 0.f))
 				{
-					IG::COPY = -int(IG::NPLOT) - 1;
+					for (unsigned int i = 0; i < IG::NFIG; i++)
+					{
+						if (std::string(figureNames[i]) == IG::FILENAME && figureSizes[i] == IG::MAXL + 100 * IG::TDEPTH)
+						{
+							IG::VIEW2 = IG::VIEW1;
+							IG::VIEW1 = i;
+
+							IG::DOUBLE_VIEW = true;
+
+							IG::PRECOMPUTE = -1;
+							IG::UPDATE_PRECOMPUTE = true;
+
+							IG::UPDATE_CURVES = true;
+							IG::UPDATE_LIGHT = -2;
+							loadMenuOpen = false;
+							figureLoaded = false;
+							ImGui::End();
+							return;
+						}
+					}
+
+					IG::COPY = IG::VIEW1;
 					IG::ALREADY_EXISTS = true;
 					IG::PRECOMPUTE = -1;
 					IG::UPDATE_PRECOMPUTE = true;
@@ -320,7 +343,7 @@ void IG_Fourier::loadMenu()
 							break;
 					}
 					add1to(figureSizes, IG::NFIG);
-					figureSizes[IG::NFIG] = IG::MAXL;
+					figureSizes[IG::NFIG] = IG::MAXL + 100 * IG::TDEPTH;
 					IG::CALCULATE_FIGURE = true;
 					loadMenuOpen = false;
 					figureLoaded = false;
@@ -393,6 +416,18 @@ void IG_Fourier::loadMenu()
 									IG::COPY = IG::PAIRS[j].y;
 									IG::ALREADY_EXISTS = true;
 								}
+							}
+						}
+					}
+					if (!IG::ALREADY_EXISTS)
+					{
+						for (unsigned int i = 0; i < IG::NPLOT; i++)
+						{
+							if (std::string(plotsNames[i]) == IG::FILENAME)
+							{
+								IG::ALREADY_EXISTS = true;
+								IG::COPY = -int(i) - 2;
+								break;
 							}
 						}
 					}
@@ -679,7 +714,7 @@ void IG_Fourier::mainMenu()
 	{
 		if (ImGui::BeginMenuBar())
 		{
-			if (iMenu != -1)
+			if (iMenu != -1 || figureLoaded)
 				ImGui::BeginDisabled();
 			if (ImGui::BeginMenu("Figure"))
 			{
@@ -736,7 +771,7 @@ void IG_Fourier::mainMenu()
 
 				ImGui::EndMenu();
 			}
-			else if (iMenu != -1)
+			else if (iMenu != -1 || figureLoaded)
 				ImGui::EndDisabled();
 
 			if (ImGui::BeginMenu("Advanced"))
