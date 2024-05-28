@@ -86,7 +86,7 @@ $|m|\leq\ell$. Up at the top bar we have different menus:
 Now let's load a figure into our program. If you click the load button a load menu will popup, up the top left you can choose between three 
 different options, `Figure`, `Coefficients` and `A Priori`:
 
-![load menus](https://github.com/MiquelNasarre/FourierS2/assets/124403865/992f8a3e-a720-4c5b-97b4-ad4602e97846)
+![load menus](https://github.com/MiquelNasarre/FourierS2/assets/124403865/3d6090d5-645f-4085-9830-de10339ad8f3)
 
 - `Figure` loads files from the _figures_ folder, which contains the triangulations, you can specify how many $\ell$ values you want as well
   as how many subdivisions should be done for each triangle. If the triangulation is already very fine, a higher depth might take a long
