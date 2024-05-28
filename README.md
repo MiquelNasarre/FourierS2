@@ -544,7 +544,7 @@ The program is not still fully finished and there are some future plans for it, 
 
 - **More efficient Spherical Harmonics calculations:** There are some ways where the calculations can be improved, for example every
   associated Legendre polynomial is calculated twice, for the positive and negative value of $m$, which is clearly inefficient. A much
-  bigger improvement though, would be calulating the Spherical Harmonics using polinomials as described in the paper. That would mean
+  bigger improvement though, would be calculating the Spherical Harmonics using polinomials, as described in the paper. That would mean
   completely changing the way they are currently being calculated, but it would really improve performance.
 
 - **Coefficients view feature:** It is a difficult concept to conceive, an intuitive way to view the set of coefficients
