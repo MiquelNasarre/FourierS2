@@ -1914,3 +1914,58 @@ void formatFile(const char* srcFile, const char* newFile)
 
 	fclose(file);
 }
+
+void mutateFile(const char* srcFile, const char* newFile, Vector3f traslation, Quaternion rotation, Vector3f scaling)
+{
+	FILE* file = fopen((FIGURES_DIR + std::string(srcFile) + ".dat").c_str(), "r");
+	if (!file)
+		throw std::exception(("Unable to find or open file: " + std::string(srcFile)).c_str());
+
+	fscanf(file, "Vertexs:\n");
+	char s[100];
+	unsigned int nV = 0;
+	while (fgets(s, 100, file)[0] != 'T')nV++;
+
+	rewind(file);
+	fscanf(file, "Vertexs:\n");
+
+	Vector3f* vertexs = (Vector3f*)calloc(nV, sizeof(Vector3f));
+	for (unsigned int i = 0; i < nV; i++)
+		fscanf(file, "(%f,%f,%f)\n", &vertexs[i].x, &vertexs[i].y, &vertexs[i].z);
+
+	fscanf(file, "Triangles:\n");
+
+	unsigned int nT = 0;
+	while (fscanf(file, "%s\n", s) != EOF)nT++;
+
+	rewind(file);
+	fscanf(file, "Vertexs:\n");
+	while (fgets(s, 100, file)[0] != 'T');
+
+	Vector3i* triangles = (Vector3i*)calloc(nT, sizeof(Vector3i));
+
+	for (unsigned int i = 0; i < nT; i++)
+		fscanf(file, "%i,%i,%i", &triangles[i].x, &triangles[i].y, &triangles[i].z);
+
+	fclose(file);
+
+	Quaternion rotationp = rotation;
+	rotationp.i *= -1;
+	rotationp.j *= -1;
+	rotationp.k *= -1;
+
+	for (unsigned int i = 0; i < nV; i++)
+		vertexs[i] = (rotation * Quaternion(traslation + vertexs[i]) * rotationp).getVector() * ScalingMatrix(scaling.x, scaling.y, scaling.z);
+
+	file = fopen((FIGURES_DIR + std::string(newFile) + ".dat").c_str(), "w");
+
+	fprintf(file, "Vertexs:");
+	for (unsigned int j = 0; j < nV; j++)
+		fprintf(file, "\n(%f,%f,%f)", vertexs[j].x, vertexs[j].y, vertexs[j].z);
+
+	fprintf(file, "\nTriangles:");
+	for (unsigned int j = 0; j < nT; j++)
+		fprintf(file, "\n%i,%i,%i", triangles[j].x, triangles[j].y, triangles[j].z);
+
+	fclose(file);
+}

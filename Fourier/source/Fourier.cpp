@@ -103,6 +103,10 @@ Fourier::Fourier()
 	harmonics.create(window.graphics, &C, 1u);
 	
 	//createShape("star");
+	//mutateFile("example", "mutexample", 
+	//	Vector3f(0.24f, 0.15f, 0.12f), 
+	//	rotationQuaternion({ 0.f,0.f,1.f }, 0.1f) * Quaternion(0.697f, -0.636f, -0.159f, 0.291f), 
+	//	{ 1.f,1.2f,1.75f });
 }
 
 int Fourier::Run()

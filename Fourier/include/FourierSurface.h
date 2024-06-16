@@ -176,6 +176,7 @@ private:
 void createShape(const char* filename);
 Vector3f figureFunction(Vector3f s2vec);
 void formatFile(const char* srcFile, const char* newFile);
+void mutateFile(const char* srcFile, const char* newFile, Vector3f traslation, Quaternion rotation, Vector3f scaling);
 
 template<typename C>
 void add1to(C*& MyStruct, unsigned int size)
